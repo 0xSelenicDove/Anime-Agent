@@ -1,0 +1,46 @@
+name: macOS Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    env:
+      NODE_OPTIONS: --max-old-space-size=4096
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js 24 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install dependencies
+        run: npm ci --foreground-scripts
+
+      - name: Verify Electron installation
+        run: npx electron --version
+
+      - name: Build
+        run: npm run build
+
+      # Unsigned --dir pack: catches electron-builder.mac.yml / icon / entitlements
+      # regressions without needing Apple signing credentials in CI.
+      - name: Package (unsigned, unpacked)
+        run: npm run package:mac:dir
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+      - name: Verify app bundle was produced
+        run: |
+          set -euo pipefail
+          app="release/mac-universal/Cyrene.app"
+          if [ ! -d "release/mac-arm64/Cyrene.app" ] && [ ! -d "release/mac/Cyrene.app" ] && [ ! -d "$app" ]; then
+            echo "No Cyrene.app bundle found under release/"
+            find release -maxdepth 2
+            exit 1
+          fi

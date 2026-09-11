@@ -117,16 +117,25 @@ Cyrene 主要面向 Windows 开发，但核心的 Electron/TypeScript 部分（L
 
 ```bash
 npm run dev             # 开发模式运行
-npm run package:mac:dir # 在 release/mac-arm64（Intel 芯片为 mac/）下生成未签名的 Cyrene.app
+npm run package:mac:dir # 在 release/mac-arm64（Intel 芯片为 mac/）下生成未签名的 Cyrene.app，适合本地调试
+npm run package:mac     # 生成 Intel + Apple Silicon 双架构的 DMG / ZIP 发行包（release/）
 ```
+
+`package:mac` 使用 `build/icon.icns` 作为应用图标，并开启 hardened runtime + `build/entitlements.mac.plist`。设置以下环境变量后，打包完成会自动向 Apple 公证服务提交公证；未设置则跳过公证，生成未公证的包：
+
+- `APPLE_ID` — Apple 账号邮箱
+- `APPLE_APP_SPECIFIC_PASSWORD` — 在 [appleid.apple.com](https://appleid.apple.com) 生成的**应用专用密码**（不是账号密码）
+- `APPLE_TEAM_ID` — Apple Developer Team ID
+
+代码签名另需 `CSC_LINK`（.p12 证书路径或 URL）与 `CSC_KEY_PASSWORD`（证书密码），由 electron-builder 自动读取。
 
 以下功能因依赖 Win32 API 或仅打包了 Windows 二进制文件，在 macOS 上暂不可用：
 
-- **截图工具** — `native/cyrene-screenshot` 完全基于 DXGI/GDI/Direct2D/Win32 剪贴板 API 实现，在 macOS 上不会启动，功能会优雅降级为禁用。
-- **音乐播放（mpv）** — `prepare:mpv` 目前只下载 Windows 版 `mpv.exe`，尚未接入 macOS 版 mpv 二进制文件。
+- **截图工具** — `native/cyrene-screenshot` 完全基于 DXGI/GDI/Direct2D/Win32 剪贴板 API 实现，仅在 Windows 上启动；在其他平台上该功能会直接返回「当前平台不支持」，不会尝试启动不存在的二进制文件。
+- **音乐播放（mpv）** — `prepare:mpv` 目前只下载 Windows 版 `mpv.exe`，尚未接入 macOS 版 mpv 二进制文件；`MpvController` 会退回到 PATH 中查找 `mpv`（例如通过 `brew install mpv` 安装）。
 - **飞书 / 微信 iLink / 全局快捷键（`nut-js`）** — 尚未在 macOS 上测试。
 
-打包产物未经签名（没有 Apple Developer ID 证书），首次启动会被 Gatekeeper 拦截，右键点击「打开」即可绕过。
+未公证的打包产物首次启动会被 Gatekeeper 拦截，右键点击「打开」即可绕过。
 
 ### 1. 克隆项目
 

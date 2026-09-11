@@ -115,17 +115,26 @@ rustup default stable-x86_64-pc-windows-msvc
 Cyrene is developed for Windows, but the Electron/TypeScript core (Live2D UI, chat, CyreneHarness, memory) builds and runs unmodified on macOS. After `npm install`, use:
 
 ```bash
-npm run dev            # run in dev mode
-npm run package:mac:dir # build an unsigned Cyrene.app under release/mac-arm64 (or mac/ on Intel)
+npm run dev             # run in dev mode
+npm run package:mac:dir # build an unsigned Cyrene.app under release/mac-arm64 (or mac/ on Intel), for local testing
+npm run package:mac     # build signed-ready Intel + Apple Silicon DMG / ZIP releases (release/)
 ```
+
+`package:mac` uses `build/icon.icns` as the app icon and enables the hardened runtime with `build/entitlements.mac.plist`. If the following environment variables are set, the build is submitted to Apple's notary service afterward; if not, notarization is skipped and an unnotarized build is produced:
+
+- `APPLE_ID` — your Apple ID email
+- `APPLE_APP_SPECIFIC_PASSWORD` — an **app-specific password** generated at [appleid.apple.com](https://appleid.apple.com) (not your account password)
+- `APPLE_TEAM_ID` — your Apple Developer Team ID
+
+Code signing itself also needs `CSC_LINK` (a path or URL to a `.p12` certificate) and `CSC_KEY_PASSWORD` (its password), which electron-builder picks up automatically.
 
 Known gaps versus Windows, since these features are implemented against Win32 APIs or ship Windows-only binaries:
 
-- **Screenshot tool** — `native/cyrene-screenshot` is a Rust helper built entirely on DXGI/GDI/Direct2D/Win32 clipboard APIs; it is not spawned on macOS and the feature is disabled (fails gracefully).
-- **Music playback (mpv)** — `prepare:mpv` only fetches a Windows `mpv.exe`; a macOS mpv binary isn't wired up yet.
+- **Screenshot tool** — `native/cyrene-screenshot` is a Rust helper built entirely on DXGI/GDI/Direct2D/Win32 clipboard APIs and only ever runs on Windows; on other platforms the feature immediately reports "unsupported on this platform" instead of trying to launch a binary that was never built.
+- **Music playback (mpv)** — `prepare:mpv` only fetches a Windows `mpv.exe`; a macOS mpv binary isn't wired up yet. `MpvController` falls back to whatever `mpv` it finds on `PATH` (e.g. installed via `brew install mpv`).
 - **Feishu / WeChat iLink / global hotkeys (`nut-js`)** — untested on macOS.
 
-The build is unsigned (no Apple Developer ID), so Gatekeeper will warn on first launch; right-click → Open to bypass.
+An unnotarized build is unsigned (no Apple Developer ID), so Gatekeeper will warn on first launch; right-click → Open to bypass.
 
 ### 1. Clone the Project
 

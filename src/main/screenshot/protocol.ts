@@ -109,9 +109,12 @@ export function resolveCompletedFile(outputDirectory: string, fileName: string):
   if (!UUID_V4_PNG_FILE_NAME.test(fileName)) {
     throw new Error("INVALID_SCREENSHOT_FILE_NAME");
   }
-  const directory = path.resolve(outputDirectory);
-  const resolved = path.resolve(directory, fileName);
-  if (path.dirname(resolved) !== directory) {
+  // The helper is Win32-only (see helper-path.ts) and always reports a Windows
+  // outputDirectory, so path.win32 is used regardless of the host platform running
+  // this code.
+  const directory = path.win32.resolve(outputDirectory);
+  const resolved = path.win32.resolve(directory, fileName);
+  if (path.win32.dirname(resolved) !== directory) {
     throw new Error("INVALID_SCREENSHOT_FILE_NAME");
   }
   return resolved;

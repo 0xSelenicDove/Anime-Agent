@@ -1,5 +1,6 @@
 appId: com.cyrene.live2d
 productName: Cyrene
+artifactName: Cyrene-${version}-mac-${arch}.${ext}
 directories:
   output: release
 asar: true
@@ -31,5 +32,30 @@ extraResources:
     to: cyrene-skills
 mac:
   category: public.app-category.productivity
+  icon: build/icon.icns
   target:
-    - dir
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+    - target: zip
+      arch:
+        - x64
+        - arm64
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  minimumSystemVersion: "11.0"
+  extendInfo:
+    NSMicrophoneUsageDescription: Cyrene 使用麦克风以支持语音通话与语音输入功能。
+afterSign: build/notarize.mac.js
+dmg:
+  artifactName: Cyrene-${version}-${arch}.${ext}
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications

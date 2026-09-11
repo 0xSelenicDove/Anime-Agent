@@ -1,7 +1,18 @@
 import * as path from "node:path";
-import { pathToFileURL } from "node:url";
 import type { ScreenshotInsertPayload } from "../../shared/ipc-channels";
 import type { ScreenshotHelperClient } from "./helper-client";
+
+/**
+ * The capture helper is Win32-only (see helper-path.ts) and always reports Windows
+ * paths, so this always applies win32 URL conversion regardless of the host platform
+ * running the code — `url.pathToFileURL` would instead apply native (POSIX-on-Mac/
+ * Linux) semantics and mangle a "C:\\..." path.
+ */
+function win32PathToFileUrl(win32Path: string): string {
+  const resolved = path.win32.resolve(win32Path);
+  const [drive, ...segments] = resolved.split(path.win32.sep).filter(Boolean);
+  return `file:///${drive}/${segments.map(encodeURIComponent).join("/")}`;
+}
 
 export type ScreenshotInsertData = ScreenshotInsertPayload;
 export type ScreenshotInsertCandidate =
@@ -36,6 +47,9 @@ export function validateScreenshotInsert(
   screenshotDirectory: string,
   loadImage: (filePath: string) => ScreenshotImageProbe,
 ): ScreenshotInsertData | null {
+  // The native capture helper is Win32-only today (see helper-path.ts), so every
+  // filePath it produces is a Windows path regardless of the host platform running
+  // this validation — path.win32 here is intentional, not a portability bug.
   const root = path.win32.resolve(screenshotDirectory);
   const filePath = path.win32.resolve(data.filePath);
   const relative = path.win32.relative(root, filePath);
@@ -63,12 +77,37 @@ export function validateScreenshotInsert(
   return {
     ...data,
     filePath,
-    previewUrl: pathToFileURL(filePath).toString(),
+    previewUrl: win32PathToFileUrl(filePath),
   };
 }
 
 function reasonFrom(error: unknown): string {
   return error instanceof Error ? error.message : "SCREENSHOT_FAILED";
+}
+
+/**
+ * Stand-in for platforms without a native capture helper build (currently
+ * everything but Windows — see helper-path.ts). Every action resolves with a
+ * clear, stable reason instead of attempting to spawn a binary that doesn't exist.
+ */
+export function createUnsupportedPlatformScreenshotService(): ScreenshotService {
+  const reason = "SCREENSHOT_UNSUPPORTED_PLATFORM";
+  return {
+    init() {},
+    async prewarm() {},
+    async startFromHotkey() {
+      return { ok: false, reason };
+    },
+    async startFromChatButton() {
+      return { ok: false, reason };
+    },
+    replaceHotkey() {
+      return { ok: false, activeHotkey: null };
+    },
+    suspendHotkey() {},
+    resumeHotkey() {},
+    async shutdown() {},
+  };
 }
 
 export function createScreenshotService(deps: ScreenshotServiceDeps): ScreenshotService {
@@ -97,7 +136,7 @@ export function createScreenshotService(deps: ScreenshotServiceDeps): Screenshot
         width: result.width,
         height: result.height,
         mime: result.mime,
-        previewUrl: pathToFileURL(result.filePath).toString(),
+        previewUrl: win32PathToFileUrl(result.filePath),
         hasAnnotations: result.hasAnnotations,
       });
       return { ok: true };

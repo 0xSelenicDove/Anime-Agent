@@ -9,6 +9,7 @@ import { ElectronScreenshotHelperClient } from "./helper-client";
 import { resolveScreenshotHelperPath } from "./helper-path";
 import {
   createScreenshotService,
+  createUnsupportedPlatformScreenshotService,
   validateScreenshotInsert,
   type ScreenshotInsertData,
   type ScreenshotService,
@@ -90,39 +91,46 @@ export function initializeScreenshotService(
     };
   };
 
-  const client = new ElectronScreenshotHelperClient({
-    spawnImpl: (command, args) =>
-      spawn(command, args, {
-        stdio: ["pipe", "pipe", "pipe"],
-        windowsHide: true,
-      }),
-    resolveHelperPath: () =>
-      resolveScreenshotHelperPath({
-        isPackaged: app.isPackaged,
-        appPath: app.getAppPath(),
-        resourcesPath: process.resourcesPath,
-        envOverride: process.env.CYRENE_SCREENSHOT_HELPER_PATH,
-      }),
-    screenshotDirectory,
-    logger: console,
+  const helperPath = resolveScreenshotHelperPath({
+    isPackaged: app.isPackaged,
+    appPath: app.getAppPath(),
+    resourcesPath: process.resourcesPath,
+    envOverride: process.env.CYRENE_SCREENSHOT_HELPER_PATH,
   });
-  // 启动即建目录 + 记录实际输出目录（排查 0x80070003 类路径问题）。
-  void ensureScreenshotDirectory(screenshotDirectory);
-  console.log("[Screenshot] helper output-dir =", screenshotDirectory);
 
-  const service = createScreenshotService({
-    client,
-    registerShortcut: (accelerator, callback) =>
-      globalShortcut.register(accelerator, callback),
-    unregisterShortcut: (accelerator) => globalShortcut.unregister(accelerator),
-    sendInsert: (data) => {
-      const validated = validateInsert(data);
-      const reactChatWindow = getReactChatWindow();
-      if (reactChatWindow && !reactChatWindow.isDestroyed()) {
-        reactChatWindow.webContents.send(IPC.SCREENSHOT_INSERT, validated);
-      }
-    },
-  });
+  let service: ScreenshotService;
+  if (helperPath) {
+    const client = new ElectronScreenshotHelperClient({
+      spawnImpl: (command, args) =>
+        spawn(command, args, {
+          stdio: ["pipe", "pipe", "pipe"],
+          windowsHide: true,
+        }),
+      resolveHelperPath: () => helperPath,
+      screenshotDirectory,
+      logger: console,
+    });
+    // 启动即建目录 + 记录实际输出目录（排查 0x80070003 类路径问题）。
+    void ensureScreenshotDirectory(screenshotDirectory);
+    console.log("[Screenshot] helper output-dir =", screenshotDirectory);
+
+    service = createScreenshotService({
+      client,
+      registerShortcut: (accelerator, callback) =>
+        globalShortcut.register(accelerator, callback),
+      unregisterShortcut: (accelerator) => globalShortcut.unregister(accelerator),
+      sendInsert: (data) => {
+        const validated = validateInsert(data);
+        const reactChatWindow = getReactChatWindow();
+        if (reactChatWindow && !reactChatWindow.isDestroyed()) {
+          reactChatWindow.webContents.send(IPC.SCREENSHOT_INSERT, validated);
+        }
+      },
+    });
+  } else {
+    console.log(`[Screenshot] no native capture helper for platform "${process.platform}" — screenshot capture disabled`);
+    service = createUnsupportedPlatformScreenshotService();
+  }
 
   ipc.handle(IPC.SCREENSHOT_START, async (event) => {
     // 请求前兜底重建目录：清理软件可能删掉 AppData 下的子目录，
