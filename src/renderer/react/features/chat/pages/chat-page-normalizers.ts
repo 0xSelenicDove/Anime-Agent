@@ -10,7 +10,7 @@ import type { PermissionApprovalRequest } from "./chat-page-bridge";
 import { recoverInterruptedMessage } from "./session-runtime-state";
 
 const CONVERSATION_MODES: readonly ConversationMode[] = ["chat", "work", "code", "learn"];
-const CHAT_MESSAGE_CHANNELS = new Set<ChatMessageChannelSource["channel"]>(["wechat", "feishu", "qq", "qqbot"]);
+const CHAT_MESSAGE_CHANNELS = new Set<ChatMessageChannelSource["channel"]>(["wechat", "feishu", "qq", "qqbot", "discord"]);
 /** 最后停留模式的 localStorage 键：写入方（ChatPage）与读取方（getInitialMode）共用同一常量。 */
 export const LAST_MODE_STORAGE_KEY = "cyrene-react-last-mode";
 

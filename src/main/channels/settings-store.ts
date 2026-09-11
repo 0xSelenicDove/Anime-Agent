@@ -180,6 +180,21 @@ export interface QqBotChannelConfig extends ChannelRuntimeConfig {
   allowedGroupOpenids: string[];
 }
 
+/** Discord 渠道（官方 Bot Gateway + REST API）。botToken 加密落盘，规则同飞书 appSecret。
+ *  与 QQ Bot 不同：Discord Bot 可主动发消息（无被动回复时间窗限制），故不需要 lastInbound 追踪。
+ *  白名单模型同 QQ Bot：DM 对方 userId 事先不知道，提供 allowAnyDm 全放行开关 + userId 白名单；
+ *  服务器（guild）消息默认要求 @ 机器人，并按 guildId 白名单过滤。 */
+export interface DiscordChannelConfig extends ChannelRuntimeConfig {
+  /** Bot Token（Discord Developer Portal → Bot → Token）。磁盘密文，运行时明文，规则同飞书 appSecret。 */
+  botToken?: string;
+  /** 所有私信（DM）放行（对方 userId 无法提前知道，首次私信被拒时会展示 userId 供加白） */
+  allowAnyDm: boolean;
+  /** 私信用户 id（snowflake）白名单 */
+  allowedUserIds: string[];
+  /** 服务器（guild）id 白名单；服务器内消息仅响应 @ 机器人 */
+  allowedGuildIds: string[];
+}
+
 /** 给上层用的明文 AppSecret 读取器 */
 export function decryptFeishuSecret(cfg: FeishuChannelConfig | undefined): string {
   return decryptField(cfg?.appSecret ?? "");
@@ -192,6 +207,7 @@ export interface ChannelsSettings {
   feishu: FeishuChannelConfig;
   qq: QqChannelConfig;
   qqbot: QqBotChannelConfig;
+  discord: DiscordChannelConfig;
   /** 入站 HTTP server 绑定的端口。0 = 随机空闲。 */
   inboundPort: number;
   /** HMAC 共享密钥。启动时若为空则自动生成。 */
@@ -230,6 +246,12 @@ const DEFAULT_SETTINGS: ChannelsSettings = {
     allowedUserOpenids: [],
     allowedGroupOpenids: [],
   },
+  discord: {
+    enabled: false,
+    allowAnyDm: false,
+    allowedUserIds: [],
+    allowedGuildIds: [],
+  },
   inboundPort: 0,
   sharedSecret: "",
   rateLimitPerUser: 10,
@@ -264,6 +286,7 @@ function normalize(input: Partial<ChannelsSettings> | null | undefined): Channel
   const f: Partial<FeishuChannelConfig> | undefined = input?.feishu;
   const q: Partial<QqChannelConfig> | undefined = input?.qq;
   const b: Partial<QqBotChannelConfig> | undefined = input?.qqbot;
+  const d: Partial<DiscordChannelConfig> | undefined = input?.discord;
   const normalizeIds = (value: unknown): string[] => {
     if (!Array.isArray(value)) return [];
     return Array.from(new Set(value
@@ -327,6 +350,16 @@ feishu: {
       allowedUserOpenids: normalizeOpenids(b?.allowedUserOpenids),
       allowedGroupOpenids: normalizeOpenids(b?.allowedGroupOpenids),
     },
+    discord: {
+      enabled: safeBool(d?.enabled, false),
+      manualCliPath: typeof d?.manualCliPath === "string" ? d?.manualCliPath : undefined,
+      publicWebhookUrl: typeof d?.publicWebhookUrl === "string" ? d?.publicWebhookUrl : undefined,
+      botToken: typeof d?.botToken === "string" ? d?.botToken : undefined,
+      allowAnyDm: safeBool(d?.allowAnyDm, false),
+      // Discord snowflake id：纯数字（64 位整数的十进制串），复用 QQ 号校验规则
+      allowedUserIds: normalizeIds(d?.allowedUserIds),
+      allowedGuildIds: normalizeIds(d?.allowedGuildIds),
+    },
     inboundPort: safeNum(input?.inboundPort, 0, 0, 65535),
     sharedSecret: typeof input?.sharedSecret === "string" ? input.sharedSecret : "",
     rateLimitPerUser: safeNum(input?.rateLimitPerUser, 10, 1, 1000),
@@ -354,6 +387,9 @@ export function loadChannelsSettings(): ChannelsSettings {
     if (loaded.qqbot.appSecret) {
       loaded.qqbot.appSecret = decryptField(loaded.qqbot.appSecret);
     }
+    if (loaded.discord.botToken) {
+      loaded.discord.botToken = decryptField(loaded.discord.botToken);
+    }
     return loaded;
   } catch {
     return { ...DEFAULT_SETTINGS };
@@ -367,6 +403,7 @@ export function saveChannelsSettings(patch: Partial<ChannelsSettings>): Channels
   if (patch.feishu) merged.feishu = { ...existing.feishu, ...patch.feishu };
   if (patch.qq) merged.qq = { ...existing.qq, ...patch.qq };
   if (patch.qqbot) merged.qqbot = { ...existing.qqbot, ...patch.qqbot };
+  if (patch.discord) merged.discord = { ...existing.discord, ...patch.discord };
 
   // 私密字段加密边界：UI 传来的是明文，写盘前要 wrap
   // 避开"密文回传"场景：检测 enc:/obf:/plain: 前缀，避免重复加密。
@@ -386,6 +423,12 @@ export function saveChannelsSettings(patch: Partial<ChannelsSettings>): Channels
     const v = merged.qqbot.appSecret;
     if (!v.startsWith(ENC_PREFIX) && !v.startsWith(OBF_PREFIX) && !v.startsWith(PLAIN_PREFIX)) {
       merged.qqbot.appSecret = encryptField(v);
+    }
+  }
+  if (typeof merged.discord?.botToken === "string" && merged.discord.botToken) {
+    const v = merged.discord.botToken;
+    if (!v.startsWith(ENC_PREFIX) && !v.startsWith(OBF_PREFIX) && !v.startsWith(PLAIN_PREFIX)) {
+      merged.discord.botToken = encryptField(v);
     }
   }
 
@@ -410,6 +453,10 @@ export function saveChannelsSettings(patch: Partial<ChannelsSettings>): Channels
       ...final.qqbot,
       appSecret: decryptField(final.qqbot.appSecret ?? ""),
     },
+    discord: {
+      ...final.discord,
+      botToken: decryptField(final.discord.botToken ?? ""),
+    },
   };
   return out;
 }
@@ -420,6 +467,7 @@ export type ChannelConfigPatch = Partial<{
   feishu: Partial<FeishuChannelConfig>;
   qq: Partial<QqChannelConfig>;
   qqbot: Partial<QqBotChannelConfig>;
+  discord: Partial<DiscordChannelConfig>;
   inboundPort: number;
   sharedSecret: string;
   rateLimitPerUser: number;
@@ -436,6 +484,7 @@ interface ChannelConfigMap {
   feishu: FeishuChannelConfig;
   qq: QqChannelConfig;
   qqbot: QqBotChannelConfig;
+  discord: DiscordChannelConfig;
 }
 
 export function getChannelConfig<K extends ChannelId>(settings: ChannelsSettings, channel: K): ChannelConfigMap[K] {

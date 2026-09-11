@@ -19,6 +19,9 @@ import {
   channelsQqBotEnabledEl, channelsQqBotStatusEl, channelsQqBotAppIdEl, channelsQqBotAppSecretEl,
   channelsQqBotAllowAnyPrivateEl, channelsQqBotUserAllowlistEl, channelsQqBotGroupAllowlistEl,
   channelsQqBotSaveBtn, channelsQqBotTestBtn, channelsQqBotFeedbackEl,
+  channelsDiscordEnabledEl, channelsDiscordStatusEl, channelsDiscordBotTokenEl,
+  channelsDiscordAllowAnyDmEl, channelsDiscordUserAllowlistEl, channelsDiscordGuildAllowlistEl,
+  channelsDiscordSaveBtn, channelsDiscordTestBtn, channelsDiscordFeedbackEl,
   channelsContextSourceEl, channelsContextTargetEl, channelsContextBindBtn,
   channelsContextBindingsListEl, channelsContextFeedbackEl,
 } from "./dom";
@@ -114,6 +117,21 @@ function renderQqBotDetail(status?: { detail?: Record<string, unknown> }): void 
   const rejected = status?.detail?.lastRejectedOpenid;
   if (typeof rejected === "string" && rejected) {
     setQqBotFeedback("info", `最近一条被白名单拒绝的消息来自 openid：${rejected}（复制到上方白名单可放行）`);
+  }
+}
+
+function setDiscordFeedback(kind: "info" | "ok" | "err", msg: string): void {
+  if (!channelsDiscordFeedbackEl) return;
+  channelsDiscordFeedbackEl.textContent = msg;
+  channelsDiscordFeedbackEl.className = "channels-feedback";
+  channelsDiscordFeedbackEl.classList.add(kind === "ok" ? "channels-feedback--ok" : kind === "err" ? "channels-feedback--err" : "channels-feedback--info");
+}
+
+/** 展示最近被拒的 userId，方便用户复制进白名单（DM 对方 id 无法提前得知） */
+function renderDiscordDetail(status?: { detail?: Record<string, unknown> }): void {
+  const rejected = status?.detail?.lastRejectedUserId;
+  if (typeof rejected === "string" && rejected) {
+    setDiscordFeedback("info", `最近一条被白名单拒绝的私信来自用户 id：${rejected}（复制到上方白名单可放行）`);
   }
 }
 
@@ -305,6 +323,18 @@ export async function loadChannelsPanel(): Promise<void> {
     if (channelsQqBotUserAllowlistEl) channelsQqBotUserAllowlistEl.value = (cfg.qqbot?.allowedUserOpenids ?? []).join("\n");
     if (channelsQqBotGroupAllowlistEl) channelsQqBotGroupAllowlistEl.value = (cfg.qqbot?.allowedGroupOpenids ?? []).join("\n");
 
+    // Discord 字段填充（token 加密存盘，UI 不回填明文）
+    if (channelsDiscordEnabledEl) channelsDiscordEnabledEl.checked = !!cfg.discord?.enabled;
+    if (channelsDiscordBotTokenEl) {
+      channelsDiscordBotTokenEl.value = "";
+      channelsDiscordBotTokenEl.placeholder = cfg.discord?.hasBotToken
+        ? "已保存（输入新值会覆盖）"
+        : "点击保存配置时加密保存";
+    }
+    if (channelsDiscordAllowAnyDmEl) channelsDiscordAllowAnyDmEl.checked = !!cfg.discord?.allowAnyDm;
+    if (channelsDiscordUserAllowlistEl) channelsDiscordUserAllowlistEl.value = (cfg.discord?.allowedUserIds ?? []).join("\n");
+    if (channelsDiscordGuildAllowlistEl) channelsDiscordGuildAllowlistEl.value = (cfg.discord?.allowedGuildIds ?? []).join("\n");
+
     // 拉一次渠道状态
     const status = (await window.settings.channelsGetStatus()) as Record<string, { phase: string; message?: string; detail?: Record<string, unknown> }>;
     renderProactiveDeliveryAvailability(status);
@@ -314,6 +344,8 @@ export async function loadChannelsPanel(): Promise<void> {
     renderQqDetail(status.qq);
     renderChannelStatus(channelsQqBotStatusEl, status.qqbot?.phase ?? "offline", status.qqbot?.message);
     renderQqBotDetail(status.qqbot);
+    renderChannelStatus(channelsDiscordStatusEl, status.discord?.phase ?? "offline", status.discord?.message);
+    renderDiscordDetail(status.discord);
     // 拉一次消息日志
     void refreshChannelsLog();
     void refreshContextBindings();
@@ -330,6 +362,7 @@ export async function loadChannelsPanel(): Promise<void> {
         feishu: { enabled: channelsFeishuEnabledEl?.checked ?? false },
         qq: { enabled: channelsQqEnabledEl?.checked ?? false },
         qqbot: { enabled: channelsQqBotEnabledEl?.checked ?? false },
+        discord: { enabled: channelsDiscordEnabledEl?.checked ?? false },
         rateLimitPerUser: Number(channelsRateUserEl?.value) || 10,
         rateLimitPerChannel: Number(channelsRateChannelEl?.value) || 100,
         ttsEnabled: channelsTtsEl?.checked ?? true,
@@ -346,6 +379,7 @@ export async function loadChannelsPanel(): Promise<void> {
     channelsFeishuEnabledEl,
     channelsQqEnabledEl,
     channelsQqBotEnabledEl,
+    channelsDiscordEnabledEl,
     channelsRateUserEl,
     channelsRateChannelEl,
     channelsTtsEl,
@@ -389,6 +423,8 @@ export async function loadChannelsPanel(): Promise<void> {
     renderQqDetail(s.qq);
     renderChannelStatus(channelsQqBotStatusEl, s.qqbot?.phase ?? "offline", s.qqbot?.message);
     renderQqBotDetail(s.qqbot);
+    renderChannelStatus(channelsDiscordStatusEl, s.discord?.phase ?? "offline", s.discord?.message);
+    renderDiscordDetail(s.discord);
   });
 
   // ===== 飞书交互（长连接版） =====
@@ -635,6 +671,49 @@ export async function loadChannelsPanel(): Promise<void> {
         : result.error ?? "连接失败");
     } catch (error) {
       setQqBotFeedback("err", error instanceof Error ? error.message : String(error));
+    }
+  });
+
+  // ===== Discord =====
+
+  channelsDiscordSaveBtn?.addEventListener("click", async () => {
+    setDiscordFeedback("info", "正在保存并连接 Discord 网关…");
+    const discord: Record<string, unknown> = {
+      enabled: channelsDiscordEnabledEl?.checked ?? false,
+      allowAnyDm: channelsDiscordAllowAnyDmEl?.checked ?? false,
+      allowedUserIds: parseIdList(channelsDiscordUserAllowlistEl?.value ?? ""),
+      allowedGuildIds: parseIdList(channelsDiscordGuildAllowlistEl?.value ?? ""),
+    };
+    // token 不回显：留空表示沿用已存值
+    if (channelsDiscordBotTokenEl?.value) discord.botToken = channelsDiscordBotTokenEl.value;
+    try {
+      await window.settings.channelsSaveConfig({ discord });
+      await window.settings.channelsRestart();
+      const status = await window.settings.channelsGetStatus() as Record<string, { phase?: string; message?: string }>;
+      if (channelsDiscordBotTokenEl) {
+        channelsDiscordBotTokenEl.value = "";
+        channelsDiscordBotTokenEl.placeholder = "已保存（输入新值会覆盖）";
+      }
+      setDiscordFeedback(
+        status.discord?.phase === "running" ? "ok" : "info",
+        status.discord?.phase === "running"
+          ? "网关已连接，机器人已上线。"
+          : `已保存（当前状态：${status.discord?.message ?? status.discord?.phase ?? "未知"}）`,
+      );
+    } catch (error) {
+      setDiscordFeedback("err", error instanceof Error ? error.message : String(error));
+    }
+  });
+
+  channelsDiscordTestBtn?.addEventListener("click", async () => {
+    setDiscordFeedback("info", "正在校验 Bot Token…");
+    try {
+      const result = await window.settings.channelsDiscordTestConnection();
+      setDiscordFeedback(result.ok ? "ok" : "err", result.ok
+        ? "Token 有效，可以正常连接 Discord 网关。"
+        : result.error ?? "连接失败");
+    } catch (error) {
+      setDiscordFeedback("err", error instanceof Error ? error.message : String(error));
     }
   });
 

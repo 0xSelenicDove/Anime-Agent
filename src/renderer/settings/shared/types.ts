@@ -298,6 +298,7 @@ export interface SettingsApi {
   channelsRestart: () => Promise<{ ok: boolean }>;
   channelsQqTestConnection: () => Promise<{ ok: boolean; error?: string; detail?: Record<string, unknown> }>;
   channelsQqBotTestConnection: () => Promise<{ ok: boolean; error?: string; detail?: Record<string, unknown> }>;
+  channelsDiscordTestConnection: () => Promise<{ ok: boolean; error?: string; detail?: Record<string, unknown> }>;
   channelsLogGet: (limit?: number) => Promise<unknown[]>;
   channelsLogClear: () => Promise<{ ok: boolean }>;
   channelsContextBindingsGet: () => Promise<{

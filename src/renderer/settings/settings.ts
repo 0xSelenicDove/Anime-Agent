@@ -73,7 +73,8 @@ import { visionBaseUrlInput, visionApiKeyInput, visionModelInput, visionFieldsWr
 import { appearanceForm, appearanceSaveStatus, runtimeSyncSelect, runtimeSyncNote, windowCornerRadiusInput, windowCornerRadiusVal, petAlwaysOnTopInput, petVisibleInput, petZoomInput, petZoomVal, chatLineHeightInput, chatLineHeightVal, assistantBubbleEnabledInput, chatParaSpacingInput, chatParaSpacingVal, launchAtLoginInput, uiFontCurrent, uiFontImportButton, uiFontResetButton, uiIconSelect, screenshotHotkeyInput, openChromeGpu, disableGpuInput, sidebarVisibleInput, tasksVisibleInput, toastSoundEnabledInput } from "./appearance/dom";
 import { generalForm, generalSaveStatus, languageSelect, defaultChatModeSelect, segmentedOutputSelect, mobileMessageSegmentationSelect, proactiveChatSelect, proactiveDeliveryRow, proactiveDeliverySelect, chatSocialContextEnabledInput, momentsEnabledInput, cyreneMomentsPostingEnabledInput, cyreneMomentsReactionsEnabledInput, momentsCharacterReactionsEnabledInput, momentsLivelinessSelect, momentsPostingRow, momentsReactionsRow, momentsCharacterRow, momentsLivelinessRow, citaEnabledInput, citaEngineSelect, clearChatHistoryBtn, customStyleSamplingBtn, customStylePromptBtn } from "./general/dom";
 import { minBtn, closeBtn, preferencesForm, sectionTitle, sectionHint, placeholderPanel, cyrenePanel, disclaimerPanel, pluginsPanel, placeholderIcon, placeholderTitle, placeholderCopy, saveStatus, runtimeSaveStatus, preferencesSaveStatus, cyreneSaveStatus, openStickerManagerBtn, addStickerBtn } from "./shared/shell";
-import { pluginAddBtn, neteaseDetailView, permissionBlocksWrap, permissionNote } from "./plugins/dom";
+import { pluginAddBtn, neteaseDetailView, spotifyDetailView, permissionBlocksWrap, permissionNote } from "./plugins/dom";
+import { loadSpotifyPanel } from "./music/spotify-panel";
 import { preferencesState } from "./preferences/state";
 import { stickerEnabledInput, stickerSizeSelect, stickerThresholdInput, stickerThresholdVal, stickerAddOverlay, stickerAddPickBtn, stickerAddFileName, stickerAddId, stickerAddDesc, stickerAddPhrases, stickerAddError, stickerAddConfirm, stickerAddCancel } from "./preferences/dom";
 import { diversityDriverOf, diversityValueOf } from "./preferences/style-utils";
@@ -1814,11 +1815,23 @@ initLocalMusicPanel();
 document.getElementById("music-platform-netease")?.addEventListener("click", () => {
   switchSection("music");
   musicHomeView?.classList.add("is-hidden");
+  spotifyDetailView?.classList.add("is-hidden");
   neteaseDetailView?.classList.remove("is-hidden");
 });
 musicReturnBtn?.addEventListener("click", () => {
 	  switchSection("plugins");
 	});
+
+document.getElementById("music-platform-spotify")?.addEventListener("click", () => {
+  switchSection("music");
+  musicHomeView?.classList.add("is-hidden");
+  neteaseDetailView?.classList.add("is-hidden");
+  spotifyDetailView?.classList.remove("is-hidden");
+  void loadSpotifyPanel();
+});
+document.getElementById("spotify-return-btn")?.addEventListener("click", () => {
+  switchSection("plugins");
+});
 
 
 

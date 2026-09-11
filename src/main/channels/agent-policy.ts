@@ -13,8 +13,12 @@ export function resolveChannelAgentPolicy(
   toolSandbox: ChannelToolSandbox,
   context?: { channel?: ChannelId; chatType?: ChannelChatType },
 ): ChannelAgentPolicy {
-  // QQ 群聊（NapCat 与官方机器人同样处理）：共享群上下文，强制纯 Chat 模式、禁工具
-  if ((context?.channel === "qq" || context?.channel === "qqbot") && context.chatType === "group") {
+  // 群聊 / 服务器频道（QQ NapCat、QQ 官方机器人、Discord 服务器同样处理）：
+  // 共享上下文，可能有陌生人在场，强制纯 Chat 模式、禁工具
+  if (
+    (context?.channel === "qq" || context?.channel === "qqbot" || context?.channel === "discord")
+    && context.chatType === "group"
+  ) {
     return {
       executionMode: "chat",
       exposeTools: false,

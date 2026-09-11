@@ -23,6 +23,7 @@ import type { GitService } from "../code-git/git-service";
 import type { LspManager } from "../lsp/manager";
 import type { ScreenshotService } from "../screenshot/screenshot-lifecycle";
 import type { MusicBootstrap } from "../music/bootstrap";
+import type { SpotifyBootstrap } from "../music/spotify/spotify-bootstrap";
 import type { AppUpdateService } from "../updater/app-update-service";
 import type { LlmClient } from "../services/llm/llm-client";
 import type { CitaService } from "../cita";
@@ -46,6 +47,7 @@ export interface CoreServices {
   lsp: LspManager;
   screenshot: ScreenshotService;
   music: MusicBootstrap;
+  spotify: SpotifyBootstrap;
   update: AppUpdateService;
 }
 
@@ -222,6 +224,11 @@ export async function startCore(deps: CoreDependencies): Promise<CoreResult> {
     id: "music",
     phase: "stopLocalResources",
     dispose: async () => { await services.music.shutdown(); },
+  });
+  shutdown.register({
+    id: "spotify",
+    phase: "stopLocalResources",
+    dispose: async () => { await services.spotify.shutdown(); },
   });
 
   readiness.transition("core-ready");

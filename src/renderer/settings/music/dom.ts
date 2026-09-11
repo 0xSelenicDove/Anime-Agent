@@ -27,3 +27,18 @@ export const musicAppIdInput = document.getElementById("music-openapi-appid") as
 export const musicPrivateKeyInput = document.getElementById("music-openapi-private-key") as HTMLTextAreaElement | null;
 export const musicSaveConfigBtn = document.getElementById("music-save-openapi-config") as HTMLButtonElement | null;
 export const musicOpenPlayerBtn = document.getElementById("music-open-player-btn") as HTMLButtonElement | null;
+
+// ── Spotify ──
+export const spotifyReturnBtn = document.getElementById("spotify-return-btn");
+export const spotifyClientIdInput = document.getElementById("spotify-client-id") as HTMLInputElement | null;
+export const spotifyStatusDot = document.getElementById("spotify-status-dot");
+export const spotifyAccountStatusText = document.getElementById("spotify-account-status-text");
+export const spotifyStatusDescription = document.getElementById("spotify-status-description");
+export const spotifyLoginBtn = document.getElementById("spotify-login-btn") as HTMLButtonElement | null;
+export const spotifyActions = document.getElementById("spotify-actions");
+export const spotifySearchForm = document.getElementById("spotify-search-form");
+export const spotifySearchHint = document.getElementById("spotify-search-hint");
+export const spotifySearchInput = document.getElementById("spotify-search-input") as HTMLInputElement | null;
+export const spotifySearchBtn = document.getElementById("spotify-search-btn") as HTMLButtonElement | null;
+export const spotifySearchResults = document.getElementById("spotify-search-results");
+export const spotifyFeedbackEl = document.getElementById("spotify-feedback");

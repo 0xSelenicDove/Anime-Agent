@@ -210,6 +210,7 @@ const channelNameKeys: Record<ChatMessageChannelSource["channel"], string> = {
   feishu: "messageList.channelSource.feishu",
   qq: "messageList.channelSource.qq",
   qqbot: "messageList.channelSource.qqbot",
+  discord: "messageList.channelSource.discord",
 };
 
 function ChannelSourceLabel({

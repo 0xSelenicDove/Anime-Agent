@@ -115,6 +115,7 @@ import { createTray } from "../tray";
 import { createSplashWindow } from "../startup/create-splash-window";
 import { revealStartupWindows } from "../startup/startup-window-reveal";
 import { bootstrapMusicService } from "../music/bootstrap";
+import { bootstrapSpotifyService } from "../music/spotify/spotify-bootstrap";
 import { resolveMusicPaths } from "../music/paths";
 import { initializeScreenshotService } from "../screenshot/screenshot-lifecycle";
 import { bootstrapConfigGetters } from "../startup/bootstrap-config";
@@ -343,6 +344,9 @@ export function createDefaultApplicationDependencies(): ApplicationDependencies 
         // 后端由首次音乐动作惰性连接，退出清理由中心协调器负责。
         const music = bootstrapMusicService(resolveMusicPaths());
 
+        // Spotify wiring（Connect 遥控 + IPC + Agent 工具；已保存 token 惰性恢复，见 spotify-bootstrap.ts）
+        const spotify = bootstrapSpotifyService(resolveMusicPaths());
+
         // 应用更新服务（检查/下载按需；安装必须先走受控退出）
         const update = createGitHubAppUpdateService({
           currentVersion: app.getVersion(),
@@ -362,6 +366,7 @@ export function createDefaultApplicationDependencies(): ApplicationDependencies 
           lsp,
           screenshot,
           music,
+          spotify,
           update,
         };
       },

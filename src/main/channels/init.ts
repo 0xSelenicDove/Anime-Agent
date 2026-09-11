@@ -1,6 +1,7 @@
 // init-channels —— channels 模块的主入口。由 index.ts 在 app.whenReady() 调一次。
 //
-// 已接入渠道：飞书（长连接）、微信（ilink 协议）、QQ（NapCat OneBot）、QQ 机器人（官方网关）。
+// 已接入渠道：飞书（长连接）、微信（ilink 协议）、QQ（NapCat OneBot）、QQ 机器人（官方网关）、
+// Discord（官方 Bot Gateway）。
 // 另含消息日志与渠道安装进度上报。
 //
 // 生命周期（Task 1 起，显式化）：
@@ -30,6 +31,7 @@ import { FeishuAdapter } from "./adapters/feishu";
 import { ILinkBotAdapter, loadCredentials } from "./adapters/wechat/ilink-bot-adapter";
 import { NapCatAdapter } from "./adapters/qq/napcat-adapter";
 import { QqBotAdapter } from "./adapters/qqbot/qqbot-adapter";
+import { DiscordAdapter } from "./adapters/discord/discord-adapter";
 import { getRecentLog, clearLog, reloadLogFromDisk } from "./message-log";
 import { logger, LogTag } from "../logger";
 
@@ -50,6 +52,7 @@ export function setChannelsConversationLifecycle(lifecycle: typeof conversationL
 let wxAdapter: ILinkBotAdapter | null = null;
 let qqAdapter: NapCatAdapter | null = null;
 let qqBotAdapter: QqBotAdapter | null = null;
+let discordAdapter: DiscordAdapter | null = null;
 
 export interface InitializeChannelsOptions {
   ipc?: IpcScope;
@@ -70,6 +73,11 @@ function getPublicChannelsSettings(): Record<string, unknown> {
       ...settings.qqbot,
       appSecret: undefined,
       hasAppSecret: Boolean(settings.qqbot.appSecret),
+    },
+    discord: {
+      ...settings.discord,
+      botToken: undefined,
+      hasBotToken: Boolean(settings.discord.botToken),
     },
   };
 }
@@ -114,6 +122,9 @@ function registerAdapters(): void {
 
   qqBotAdapter = new QqBotAdapter(broadcastChannelsStatus);
   channelManager.register(qqBotAdapter);
+
+  discordAdapter = new DiscordAdapter(broadcastChannelsStatus);
+  channelManager.register(discordAdapter);
 }
 
 /** 显式启动：inbound-server + 所有已注册 adapter。必须晚于 initRAG / initMcpManager。idempotent。 */
@@ -299,6 +310,12 @@ function registerChannelsIpc(
   ipc.handle(IPC.CHANNELS_QQBOT_TEST_CONNECTION, async () => {
     if (!qqBotAdapter) return { ok: false, error: "QQ Bot adapter 未初始化" };
     return await qqBotAdapter.testConnection();
+  });
+
+  // ── Discord IPC ───────────────────────────────────────────────────────────
+  ipc.handle(IPC.CHANNELS_DISCORD_TEST_CONNECTION, async () => {
+    if (!discordAdapter) return { ok: false, error: "Discord adapter not initialized" };
+    return await discordAdapter.testConnection();
   });
 
   // 消息日志

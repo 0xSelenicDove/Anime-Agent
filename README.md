@@ -17,7 +17,7 @@
 > it brings character-driven conversation, personalized memory, voice interaction, tool use, and multi-platform access into a single desktop Agent,  
 > supporting four conversation modes: Chat, Work, Code, and Learn.
 >
-> Through the **Character Pack** system, the name, personality, speech style, avatar, and even the Live2D model can all be swapped as a unit — a generic, IP-free example pack ships built in and can be switched to instantly, and you can build your own pack around any character you like. See the [character pack guide](docs/user-guide/character-packs.md) (Chinese).
+> Through the **Character Pack** system, the name, personality, speech style, avatar, and even the Live2D model can all be swapped as a unit — a generic, IP-free example pack ships built in and can be switched to instantly, and you can build your own pack around any character you like. See the [character pack guide](docs/user-guide/character-packs.md).
 
 > [!NOTE]
 > This repository is forked from [Playa-0v0/Cyrene-Agent](https://github.com/Playa-0v0/Cyrene-Agent), with a character-pack system added on top. All credit for the original project's design and engineering goes to the original author; the changes here are scoped to making "who the character is" configurable.
@@ -26,7 +26,7 @@
 
 ## ✨ At a Glance
 
-- 🎭 **Character Packs** — Swap the name, personality, avatar, and Live2D model as a unit; a built-in example pack works out of the box, and custom packs can be imported too. See the [guide](docs/user-guide/character-packs.md) (Chinese)
+- 🎭 **Character Packs** — Swap the name, personality, avatar, and Live2D model as a unit; a built-in example pack works out of the box, and custom packs can be imported too. See the [guide](docs/user-guide/character-packs.md)
 - 🌸 **Playful Desktop Companion** — A persistent Live2D character with expressions, actions, status, mood, speech bubbles, and intelligent stickers
 - 💬 **Casual Conversation (Chat)** — Focused on character-driven interaction, with responses shaped by conversation history, user style, and long-term memory
 - 🛠️ **Assisted Work (Work)** — General-purpose task session that chains together web search, file processing, document generation, and lifestyle tools through the [CyreneHarness](./src/main/orchestrator/harness/cyrene-harness.ts) main loop
@@ -200,7 +200,21 @@ The music tool is integrated via [Code-MonkeyZhang/cloud-music-mcp](https://gith
 >
 > The music feature is optional and does not affect chat or other core features. If `uv` is not installed, the music tool will be skipped automatically with a UI prompt.
 
-### 6. Build and Start
+### 6. Spotify Feature (Optional)
+
+Alongside NetEase Cloud Music, Settings → Plugins → Music has a **Spotify** card for international users. Unlike NetEase, Spotify's official API doesn't hand out playable audio-stream URLs to third-party apps — the only sanctioned integration is [Spotify Connect](https://developer.spotify.com/documentation/web-api/concepts/spotify-connect), which remote-controls a device that's already running the real Spotify app (phone, desktop, or web player). So this feature searches the Spotify catalog and sends play/pause/skip commands to that device rather than streaming audio itself.
+
+To connect it:
+
+1. Create an app at [developer.spotify.com/dashboard](https://developer.spotify.com/dashboard) to get a **Client ID** (no client secret needed — login uses Authorization Code + PKCE).
+2. Add `http://127.0.0.1:61823/callback` as a Redirect URI on that app (the settings card shows this value too).
+3. Paste the Client ID into the Spotify card and click **Connect Spotify** — this opens your system browser to approve access, then hands control back to Cyrene automatically.
+
+> [!NOTE]
+>
+> Playback control requires a **Spotify Premium** account and an already-open Spotify session on some device — this is a Spotify product restriction, not something this app can work around. Search works on any account.
+
+### 7. Build and Start
 
 When running from source for the first time, you need to build the Rust native screenshot helper:
 
@@ -254,7 +268,7 @@ After starting the application, **click the system tray icon → Open Settings**
 
 3. **🎧 ASR Settings** (optional): To use voice calls, configure Alibaba Cloud real-time ASR credentials or the API key shared with Mossland TTS.
 
-4. **📱 External Channels** (optional): Connect Feishu, WeChat iLink, or QQ through NapCat/OneBot 11.
+4. **📱 External Channels** (optional): Connect Discord, Feishu, WeChat iLink, or QQ through NapCat/OneBot 11.
 
 Configuration is stored in the application's `<userData>/` directory. Most changes do not require a restart.
 
@@ -276,6 +290,7 @@ Configuration is stored in the application's `<userData>/` directory. Most chang
 | ✨ Skill System | ✅ Available | Built-in Skills, user-defined Skills, slash commands, and reference reading |
 | 📚 RAG Document Knowledge Base | 🧪 Experimental | Multi-format document import, vector + BM25 hybrid retrieval, Reranker, and source traceability |
 | 🔌 MCP Extension Ecosystem | 🧪 Experimental | Supports stdio, SSE, and HTTP transports; actual compatibility depends on the third-party MCP Server |
+| 📱 Discord | 🧪 Experimental | Official Bot Gateway, DM/server allowlists, mention-gated server replies, proactive sends |
 | 📱 Feishu / Lark | ✅ Available | Long-connection message access and multiple media types |
 | 📱 WeChat iLink | 🧪 Experimental | Long-poll message exchange, media handling, and mobile chat |
 | 📱 QQ / NapCat | 🧪 Experimental | OneBot 11 reverse WebSocket, private/group allowlists, replies, mentions, and cross-WSL media |
@@ -397,6 +412,20 @@ The Embedding index uses a background Worker, batching, and caching to reduce pe
 
 If OOM errors continue, use the Chrome DevTools Memory Profiler in development mode to capture a Heap Snapshot, then include the reproduction steps and relevant logs in the Issue.
 
+### "Unable to find Electron app" / "Cannot find module ...dist\main\main\index.js"
+
+This happens when `npm start` / `cyrene run` (including double-clicking `start.bat` on Windows) is launched before a build has completed successfully. `dist/` is a gitignored build artifact — Electron's entry point (`dist/main/main/index.js`) is only created by `npm run build`, and does not appear just from `npm install` or `git pull`/`git clone`.
+
+Fix, on any platform:
+
+```bash
+npm install
+npm run build
+npm start
+```
+
+If `npm run build` itself errors out, resolve that error first (or open an Issue with the full output) — `npm start` will keep hitting this dialog until `dist/main/main/index.js` actually exists on disk.
+
 ---
 
 ## ✨ Features
@@ -410,7 +439,7 @@ If OOM errors continue, use the Chrome DevTools Memory Profiler in development m
 - **Intelligent Stickers** — Includes a built-in sticker panel and semantic matching that can automatically select stickers appropriate to the current context.
 - **Multi-Window Interaction** — The companion, chat, settings, tasks, call, and sticker-management windows are independent while sharing unified runtime state.
 - **Customizable Appearance** — Supports interface themes, chat styles, and font selection.
-- **Character Packs** — Swap the name, personality, avatar, and even the Live2D model for a different character. A generic, IP-free character ships built in and can be switched to instantly; custom packs can be authored and imported as a zip. See the [character pack guide](docs/user-guide/character-packs.md) (Chinese).
+- **Character Packs** — Swap the name, personality, avatar, and even the Live2D model for a different character. A generic, IP-free character ships built in and can be switched to instantly; custom packs can be authored and imported as a zip. See the [character pack guide](docs/user-guide/character-packs.md).
 
 #### 💬 Casual Conversation (Chat)
 
@@ -504,7 +533,7 @@ Cyrene includes many built-in and extensible tools, primarily covering the follo
 - **Web Capabilities** — Web search, webpage reading, content extraction, and information organization.
 - **File Processing** — Read, write, and browse local files, as well as interpret images.
 - **Everyday Services** — Weather, maps, translation, currency conversion, bookkeeping, trip planning, and more.
-- **Music** — Search for songs, retrieve recommendations, and invoke a local music client for playback.
+- **Music** — Search for songs, retrieve recommendations, and invoke a local music client for playback (NetEase Cloud Music), or search Spotify's catalog and remote-control an already-open Spotify session via Spotify Connect.
 - **Task Collaboration** — Task lists, user-choice cards, task delegation, and subtask handling.
 - **MCP Extensions** — Connect additional external tools and services through the Model Context Protocol.
 
@@ -528,10 +557,11 @@ Cyrene includes many built-in and extensible tools, primarily covering the follo
 
 #### 📱 External Channels
 
+- **Discord** — Connects through the official Bot Gateway (create an app at [discord.com/developers/applications](https://discord.com/developers/applications)). Unlike QQ's official bot API, Discord bots can send messages proactively at any time — no passive-reply window. DMs and server messages are filtered through separate allowlists, and server replies require an @-mention of the bot.
 - **Feishu / Lark** — Connects through the official SDK and WebSocket long connection without requiring a public server or tunneling.
 - **WeChat iLink** — Supports long-poll message receiving, text sending, and partial media processing.
 - **QQ / NapCat** — Connects through a OneBot 11 reverse WebSocket with private/group allowlists, replies, mentions, and media. See the [NapCat guide](docs/user-guide/napcat-onebot.md).
-- **Unified Character Across Channels** — Desktop, Feishu, WeChat, and QQ share the same character design and memory capabilities.
+- **Unified Character Across Channels** — Desktop, Discord, Feishu, WeChat, and QQ share the same character design and memory capabilities.
 - **Channel-Specific Style** — Mobile and desktop chat can use different expression styles.
 
 #### ✨ Skill System
@@ -600,7 +630,7 @@ Cyrene includes many built-in and extensible tools, primarily covering the follo
 | Voice and Media | TTS / ASR + `silk-wasm` |
 | Native Screenshot Helper | Rust + DXGI Desktop Duplication / Direct2D / GDI + WIC PNG + NDJSON IPC |
 | Self-Developed Core | CITA (context understanding), CyreneHarness (agent loop and permission approval), DMAE Worldbook, unified Structured Output Pipeline |
-| External Channels | Feishu OpenAPI, WeChat iLink, NapCat / OneBot 11 |
+| External Channels | Discord Bot Gateway, Feishu OpenAPI, WeChat iLink, NapCat / OneBot 11 |
 | Documents and Email | ExcelJS, docx, PDFKit, Nodemailer |
 | Testing | Vitest 4 |
 
@@ -623,7 +653,7 @@ src/
 ├── main/             # Electron main process
 │   ├── asr/          # Speech recognition (Alibaba Cloud real-time / Mossland batch transcription)
 │   ├── call/         # Voice-call core (ASR -> Agent -> TTS turns)
-│   ├── channels/     # External channel adapters (Feishu / WeChat iLink / QQ OneBot 11 / ...)
+│   ├── channels/     # External channel adapters (Discord / Feishu / WeChat iLink / QQ OneBot 11 / ...)
 │   ├── chat/         # Chat support (image handling / think filtering / sending policy)
 │   ├── chats/        # Multi-conversation history and persistence
 │   ├── cita/         # CITA context-understanding and recommendation engine
@@ -632,7 +662,7 @@ src/
 │   ├── learn/        # Learn mode: Obsidian Vault binding + progress overview
 │   ├── lsp/          # LSP client (manager / client / server-catalog / server-discovery)
 │   ├── memory/       # L0/L1/L2 memory engine + DMAE Worldbook + entity relationship graph
-│   ├── music/        # Music companion features (playback / recommendations / sessions / MCP client)
+│   ├── music/        # Music companion features (NetEase playback/recommendations/sessions; music/spotify/ for Spotify Connect)
 │   ├── orchestrator/ # Agent loop, tool scheduling, and permission approval
 │   │   ├── harness/  # CyreneHarness core (while loop + compaction + retry + uncertainty)
 │   │   ├── sandbox/  # Windows command-execution sandbox (@anthropic-ai/sandbox-runtime integration)
