@@ -1,25 +1,31 @@
 <p align="center">
-  <img src="./docs/image/preview.png" alt="Cyrene Agent" width="800">
+  <img src="./docs/image/preview.png" alt="Anime Agent" width="800">
 </p>
 
-<h1 align="center">Cyrene-Agent</h1>
+<h1 align="center">Anime Agent</h1>
 
 <p align="center">
   <a href="./README.en.md">English</a> | <strong>中文</strong>
 </p>
 
 
-**Cyrene-Agent 是一个以《崩坏：星穹铁道》昔涟为核心角色的 Windows Live2D AI 桌面伴侣。**
+**Anime Agent 是一个 Windows Live2D AI 桌面伴侣，默认搭载《崩坏：星穹铁道》昔涟，但陪你聊天的角色本身是可替换的。**
 
 > 基于 Electron + TypeScript 开发的桌面端 Live2D 智能对话 Agent。  
-> 项目围绕昔涟（Cyrene）的角色设定，结合自研Cyrene_Harness+DMAE 记忆引擎，  
+> 结合自研 Cyrene_Harness + DMAE 记忆引擎，  
 > 将角色化聊天、个性化记忆、语音交互、工具调用与多平台接入整合在同一个桌面 Agent 中，  
 > 支持日常聊天（Chat）、辅助工作（Work）、代码协作（Code）、学习陪伴（Learn）四种对话模式。
+>
+> 通过**角色包（Character Pack）**系统，名字、人设、说话方式、头像乃至 Live2D 模型都能整体换成别的角色——内置一个不含任何 IP 背景的示例角色包可以直接切换，也可以自己做一个装进任意喜欢的二次元角色，详见[角色包使用说明](docs/user-guide/character-packs.md)。
+
+> [!NOTE]
+> 本仓库 fork 自 [Playa-0v0/Cyrene-Agent](https://github.com/Playa-0v0/Cyrene-Agent)，在原项目基础上新增了角色包系统。原项目的全部功能设计与工程实现归功于原作者，本仓库的改动仅限于让"角色是谁"这件事可配置。
 
 ---
 
 ## ✨ 速览
 
+- 🎭 **角色包（Character Pack）** — 名字、人设、头像、Live2D 模型整体可换，内置示例角色开箱即用，也支持导入自制角色包，详见[使用说明](docs/user-guide/character-packs.md)
 - 🌸 **趣味桌面陪伴** — Live2D 角色常驻桌面，支持表情、动作、状态、心情、气泡互动与智能表情包
 - 💬 **日常聊天（Chat）** — 专注角色化交流，结合会话历史、用户风格与长期记忆自然回应
 - 🛠️ **辅助工作（Work）** — 通用任务会话，支持联网搜索、文件处理、文档生成、生活服务等工具的串联调用，由 CyreneHarness 主循环统一调度
@@ -125,8 +131,8 @@ npm run package:mac:dir # 在 release/mac-arm64（Intel 芯片为 mac/）下生�
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/Playa-0v0/Cyrene-Agent.git
-cd Cyrene-Agent
+git clone https://github.com/0xSelenicDove/Anime-Agent.git
+cd Anime-Agent
 ```
 
 ### 2. 安装依赖
@@ -644,6 +650,7 @@ MIT 仅约束本仓库的源代码，不适用于角色、Live2D 模型与美术
 
 ## 🙏 致谢
 
+- **基础项目**：本仓库 fork 自 [Playa-0v0/Cyrene-Agent](https://github.com/Playa-0v0/Cyrene-Agent)，桌面 Agent 的核心设计与实现均来自原项目
 - **昔涟角色**：© HoYoverse / 米哈游
 - **Live2D 模型**：由 [@是依七哒](https://space.bilibili.com/457683484) 制作 —
   详见 [MODEL_LICENSE.md](./MODEL_LICENSE.md)

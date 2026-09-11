@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="./docs/image/preview.png" alt="Cyrene Agent" width="800">
+<img src="./docs/image/preview.png" alt="Anime Agent" width="800">
 
-# Cyrene-Agent
+# Anime Agent
 
 **English** | [中文](./README.md)
 
@@ -10,17 +10,23 @@
 
 
 
-**Cyrene-Agent is a Windows Live2D AI desktop companion centered around Cyrene from _Honkai: Star Rail_.**
+**Anime Agent is a Windows Live2D AI desktop companion. It ships with Cyrene from _Honkai: Star Rail_ by default, but the character you talk to is swappable.**
 
 > A desktop Live2D conversational Agent built with Electron and TypeScript.  
-> Centered around Cyrene's character design and powered by the self-developed Cyrene_Harness&DMAE memory engine,  
+> Powered by the self-developed Cyrene_Harness & DMAE memory engine,  
 > it brings character-driven conversation, personalized memory, voice interaction, tool use, and multi-platform access into a single desktop Agent,  
 > supporting four conversation modes: Chat, Work, Code, and Learn.
+>
+> Through the **Character Pack** system, the name, personality, speech style, avatar, and even the Live2D model can all be swapped as a unit — a generic, IP-free example pack ships built in and can be switched to instantly, and you can build your own pack around any character you like. See the [character pack guide](docs/user-guide/character-packs.md) (Chinese).
+
+> [!NOTE]
+> This repository is forked from [Playa-0v0/Cyrene-Agent](https://github.com/Playa-0v0/Cyrene-Agent), with a character-pack system added on top. All credit for the original project's design and engineering goes to the original author; the changes here are scoped to making "who the character is" configurable.
 
 ---
 
 ## ✨ At a Glance
 
+- 🎭 **Character Packs** — Swap the name, personality, avatar, and Live2D model as a unit; a built-in example pack works out of the box, and custom packs can be imported too. See the [guide](docs/user-guide/character-packs.md) (Chinese)
 - 🌸 **Playful Desktop Companion** — A persistent Live2D character with expressions, actions, status, mood, speech bubbles, and intelligent stickers
 - 💬 **Casual Conversation (Chat)** — Focused on character-driven interaction, with responses shaped by conversation history, user style, and long-term memory
 - 🛠️ **Assisted Work (Work)** — General-purpose task session that chains together web search, file processing, document generation, and lifestyle tools through the [CyreneHarness](./src/main/orchestrator/harness/cyrene-harness.ts) main loop
@@ -124,8 +130,8 @@ The build is unsigned (no Apple Developer ID), so Gatekeeper will warn on first 
 ### 1. Clone the Project
 
 ```bash
-git clone https://github.com/Playa-0v0/Cyrene-Agent.git
-cd Cyrene-Agent
+git clone https://github.com/0xSelenicDove/Anime-Agent.git
+cd Anime-Agent
 ```
 
 ### 2. Install Dependencies
@@ -716,6 +722,7 @@ Character IP, the Cyrene Live2D model (`models/cyrene/`), and artwork assets are
 
 ## 🙏 Acknowledgements
 
+- **Base project**: This repository is forked from [Playa-0v0/Cyrene-Agent](https://github.com/Playa-0v0/Cyrene-Agent) — the desktop Agent's core design and implementation come from the original project
 - **Cyrene Character**: © HoYoverse / miHoYo
 - **Live2D Model**: Created by [@是依七哒](https://space.bilibili.com/457683484) — see [MODEL_LICENSE.md](./MODEL_LICENSE.md)
 - **Live2D Cubism SDK**: © Live2D Cubism
