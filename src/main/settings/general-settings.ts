@@ -56,7 +56,8 @@ export interface GeneralSettings extends ChatAppearanceSettings {
   /** 提醒中心音效总开关：关闭后所有 toast 静音，弹窗行为不受影响。 */
   toastSoundEnabled: boolean;
   launchAtLogin: boolean;
-  language: "zh-CN";
+  /** UI/date/response language. Only "zh-CN" and "en" have translation resources today. */
+  language: "zh-CN" | "en";
   uiTheme: UiTheme;
   windowCornerRadius: number;
   /** @deprecated 旧版透明窗口开关，仅保留用于配置兼容。 */

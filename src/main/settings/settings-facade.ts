@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import { app } from "electron";
 import {
   DEFAULT_WINDOW_CORNER_RADIUS,
   normalizeWindowCornerRadius,
@@ -36,6 +37,25 @@ import {
 } from "./launch-at-login";
 import { DEFAULT_CHARACTER_PACK_ID, isValidCharacterPackId } from "../../shared/character-pack";
 
+/** Only these have real translation resources today (see src/renderer/react/i18n). */
+const SUPPORTED_LANGUAGES = ["zh-CN", "en"] as const;
+
+/** Resolves the OS locale to a supported language, defaulting to English for anything non-Chinese. */
+function resolveSystemDefaultLanguage(): GeneralSettings["language"] {
+  try {
+    return app.getLocale().toLowerCase().startsWith("zh") ? "zh-CN" : "en";
+  } catch {
+    return "en";
+  }
+}
+
+function normalizeLanguage(value: unknown): GeneralSettings["language"] {
+  if (typeof value === "string" && (SUPPORTED_LANGUAGES as readonly string[]).includes(value)) {
+    return value as GeneralSettings["language"];
+  }
+  return resolveSystemDefaultLanguage();
+}
+
 const DEFAULT_GENERAL_SETTINGS: GeneralSettings = {
   activeCharacterPackId: DEFAULT_CHARACTER_PACK_ID,
   plugins: {},
@@ -56,7 +76,7 @@ const DEFAULT_GENERAL_SETTINGS: GeneralSettings = {
   tasksVisible: true,
   toastSoundEnabled: true,
   launchAtLogin: false,
-  language: "zh-CN",
+  language: resolveSystemDefaultLanguage(),
   uiTheme: "pearl-white",
   windowCornerRadius: DEFAULT_WINDOW_CORNER_RADIUS,
   uiThemeRadius: false,
@@ -237,7 +257,7 @@ export function normalizeGeneralSettings(
       ? DEFAULT_GENERAL_SETTINGS.toastSoundEnabled
       : Boolean(input.toastSoundEnabled),
     launchAtLogin: Boolean(input?.launchAtLogin),
-    language: "zh-CN",
+    language: normalizeLanguage(input?.language),
     uiTheme: normalizeUiTheme(input?.uiTheme),
     windowCornerRadius: normalizeWindowCornerRadius(input?.windowCornerRadius),
     uiThemeRadius: input?.uiThemeRadius ?? true,
