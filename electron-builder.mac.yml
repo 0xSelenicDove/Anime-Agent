@@ -1,0 +1,35 @@
+appId: com.cyrene.live2d
+productName: Cyrene
+directories:
+  output: release
+asar: true
+asarUnpack:
+  - "**/vendor/srt-win/**"
+  - "**/node_modules/@ast-grep/**"
+  - "**/node_modules/@playwright/**"
+  - "**/node_modules/playwright/**"
+  - "**/node_modules/playwright-core/**"
+electronDist: node_modules/electron/dist
+files:
+  - dist/**/*
+  - "!dist/components/**/*"
+  - package.json
+  - assets/**/*
+  - vendor/**/*
+  - "!vendor/cloud-music-mcp/**/*"
+  - "!vendor/cyrene-skills/**/*"
+  - "!models/**/*"
+extraFiles:
+  - from: prompts
+    to: prompts
+  - from: skills
+    to: skills
+extraResources:
+  - from: resources/components
+    to: components
+  - from: vendor/cyrene-skills
+    to: cyrene-skills
+mac:
+  category: public.app-category.productivity
+  target:
+    - dir

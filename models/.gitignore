@@ -1,0 +1,11 @@
+# Ignore large model binary files
+**/onnx/*.onnx
+**/onnx/*.onnx_data
+
+# Model weights / tokenizers are downloaded or installed at runtime,
+# they must never be committed (a 17MB tokenizer.json once leaked into
+# the remote history via a "backup" commit).
+# Only the placeholder files below are tracked.
+*
+!.gitignore
+!.gitkeep

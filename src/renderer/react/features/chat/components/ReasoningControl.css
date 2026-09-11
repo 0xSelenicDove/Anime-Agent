@@ -1,0 +1,66 @@
+.cy-reasoning-panel {
+  width: max-content;
+  max-width: 430px;
+  padding: 2px;
+}
+
+.cy-reasoning-control {
+  margin-left: auto;
+}
+
+.cy-reasoning-icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  object-fit: contain;
+}
+
+.cy-reasoning-panel > strong,
+.cy-reasoning-panel > span {
+  display: block;
+}
+
+.cy-reasoning-panel > strong {
+  margin: 3px 4px 4px;
+  color: var(--cy-text);
+  font: 600 14px/1.35 var(--rb-font-sans, sans-serif);
+}
+
+.cy-reasoning-panel > span {
+  margin: 0 4px 12px;
+  color: var(--cy-text-muted);
+  font: 400 12px/1.35 var(--rb-font-sans, sans-serif);
+}
+
+.cy-reasoning-popover .ant-popover-inner {
+  border: 1px solid #eeeeee;
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(29, 29, 31, 0.12);
+}
+
+.cy-reasoning-popover .ant-segmented {
+  padding: 3px;
+  border-radius: 10px;
+  background: #f7f7f7;
+}
+
+.cy-reasoning-popover .ant-segmented-item {
+  min-width: 44px;
+  color: var(--cy-text-muted, #5d5d5d);
+  font: 500 12px/28px var(--rb-font-sans, sans-serif);
+}
+
+/* antd v6 的滑块是 .ant-segmented-thumb 元素（v4 时代的 item::after 写法已失效，
+   默认白色块会盖住选中文字）。改为半透明强调色高亮 + 选中文字用强调色，
+   跟随昔涟主题变量（--cy-accent），变量缺失时回退默认粉。 */
+.cy-reasoning-popover .ant-segmented-thumb {
+  border-radius: 8px;
+  background: rgba(255, 91, 138, 0.22);
+  background: color-mix(in srgb, var(--cy-accent, #FF5B8A) 22%, transparent);
+  box-shadow: none;
+}
+
+.cy-reasoning-popover .ant-segmented-item-selected {
+  color: var(--cy-accent, #FF5B8A);
+  font-weight: 600;
+}

@@ -1,0 +1,67 @@
+name: 架构讨论 🧠
+description: 核心模块、依赖边界、API 设计方向——发起深度讨论
+labels: ["rfc"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🧠 这是技术深度讨论，不是功能请求
+        请描述：核心模块现状、提议的设计、影响范围与替代方案。
+        如果只是想加用户能感知的功能/UI 改动，请返回「功能请求 ✨」。
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: 涉及哪个核心模块
+      multiple: true
+      options:
+        - Agent / 对话引擎
+        - 工具 / 技能
+        - 插件系统
+        - 渠道接入
+        - 事件总线
+        - 提示词 / 上下文
+        - 渲染层 / UI
+        - 持久化 / 配置
+        - 构建 / 打包
+        - 其他
+    validations:
+      required: true
+
+  - type: input
+    id: context
+    attributes:
+      label: 涉及的文件 / 模块路径
+      description: 比如 src/main/plugin/loader.ts、CyreneHarness、tool-shared
+    validations:
+      required: false
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 当前痛点 / 风险
+      description: 现状有什么问题？为什么需要改？不动会怎样？
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 提议的设计方案
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 考虑过的替代方案
+    validations:
+      required: false
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: 影响范围 / 风险
+      description: 谁会受影响？插件？渠道？数据迁移？回滚成本？
+    validations:
+      required: false

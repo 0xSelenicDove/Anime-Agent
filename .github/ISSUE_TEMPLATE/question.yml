@@ -1,0 +1,75 @@
+name: 使用咨询 ❓
+description: 不知道某个功能怎么用、找不到入口、配置不明白——在这里问
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🌸 提问前先搜一搜
+        很多常见问题在 README / 设置页 / 文档里有答案。
+        实在找不到再在这里描述。
+
+        > 如果是 app 崩溃、报错、行为异常，请返回「运行时 Bug 🐛」。
+        > 如果是希望新功能/改进，请返回「功能请求 ✨」。
+
+  - type: dropdown
+    id: mode
+    attributes:
+      label: 在哪个模式
+      options:
+        - chat（聊天）
+        - work（工作）
+        - learn（学习）
+        - code（编程）
+        - 不确定 / 其他
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: 涉及哪个区域
+      multiple: true
+      options:
+        - 对话 / Agent
+        - 工具 / 技能 / 插件
+        - 界面 / 交互
+        - 渠道接入（QQ、微信等）
+        - 语音（TTS / ASR / 通话）
+        - Live2D / 外观
+        - 设置 / 配置
+        - 其他
+    validations:
+      required: true
+
+  - type: input
+    id: feature
+    attributes:
+      label: 想用的功能
+      description: 一句话（比如「定时任务」「插件市场」「Live2D 模型切换」）
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: 想达成什么效果
+      description: 你希望最终能做到什么？
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: 试过什么、卡在哪
+      description: 找了哪些地方、试了哪些操作、看到了什么
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 截图（可选）
+      description: 当前界面、设置页等
+    validations:
+      required: false
