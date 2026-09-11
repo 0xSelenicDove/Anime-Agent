@@ -131,13 +131,11 @@ body {
 	}
 
 	[data-ui-theme="pearl-white"] .nav-item__avatar {
-	  content: url("/icons/cyrene-avatar-line.svg");
-	  display: block;
+	  filter: brightness(0);
 	}
 
 	[data-ui-theme="pearl-white"] .panel-heading__avatar {
-	  content: url("/icons/cyrene-avatar-line.svg");
-	  display: block;
+	  filter: brightness(0);
 	}
 
 .nav-item:hover,
