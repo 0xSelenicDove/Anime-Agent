@@ -18,6 +18,7 @@ function makeServices(): CoreServices {
     lsp: { disposeAll: vi.fn() } as never,
     screenshot: { shutdown: vi.fn() } as never,
     music: { shutdown: vi.fn(async () => ({})) } as never,
+    spotify: { shutdown: vi.fn(async () => undefined) } as never,
     update: {} as never,
   };
 }

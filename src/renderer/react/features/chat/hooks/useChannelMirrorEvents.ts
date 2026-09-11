@@ -42,6 +42,7 @@ const CHANNEL_LABELS: Record<string, string> = {
   feishu: "飞书",
   qq: "QQ",
   qqbot: "QQ机器人",
+  discord: "Discord",
 };
 
 /** 镜像文本截断上限：过长消息只保留开头，避免刷屏。 */

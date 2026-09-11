@@ -103,6 +103,7 @@
       "feishu": "飞书",
       "qq": "QQ",
       "qqbot": "QQ Bot",
+      "discord": "Discord",
       "unknown": "外部渠道",
       "sameConversation": "{{channels}} · 同一对话"
     }

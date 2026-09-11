@@ -12,5 +12,6 @@ export const travelAmapKeyInput = document.getElementById("travel-amap-key") as 
 export const playwrightMcpCheckbox = document.getElementById("plugin-playwright-mcp-enabled") as HTMLInputElement | null;
 export const pluginAddBtn = document.querySelector(".plugin-add-btn") as HTMLButtonElement | null;
 export const neteaseDetailView = document.getElementById("netease-detail-view");
+export const spotifyDetailView = document.getElementById("spotify-detail-view");
 export const permissionBlocksWrap = document.getElementById("plugin-file-permission") as HTMLElement | null;
 export const permissionNote = document.getElementById("plugin-file-note") as HTMLElement | null;

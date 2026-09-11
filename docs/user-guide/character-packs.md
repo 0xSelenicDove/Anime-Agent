@@ -1,35 +1,37 @@
-# 角色包（Character Pack）使用说明
+**English** | [中文](./character-packs.zh-CN.md)
 
-Cyrene Agent 默认搭载的是"昔涟"这个角色，但名字、说话方式、头像、甚至 Live2D 立绘都可以整体换成别的角色——这就是**角色包**。换包不影响功能：工具、记忆、Moments、TTS 等一切照常工作，变的只是"陪你聊天的是谁"。
+# Character Pack Guide
+
+Cyrene Agent ships by default with the character "Cyrene," but the name, speech style, avatar, and even the Live2D model can all be swapped out for a different character as a unit — that's a **Character Pack**. Switching packs doesn't affect functionality: tools, memory, Moments, TTS, and everything else keep working as usual. The only thing that changes is *who* you're chatting with.
 
 ---
 
-## 一、有哪几种角色包
+## 1. Which character packs are available
 
-打开 **设置 → 角色**，能看到一个卡片列表：
+Open **Settings → Character** to see a list of cards:
 
-| 角色包 | id | 说明 |
+| Character Pack | id | Description |
 | --- | --- | --- |
-| 昔涟 | `cyrene` | 内置默认角色，Honkai: Star Rail 同人形象，自带 Live2D 模型 |
-| 小助手 | `generic` | 内置的示例角色，不含任何 IP 背景，复用昔涟的 Live2D 形象 |
-| （你导入的包） | 自定义 | 通过 zip 文件导入，见下文 |
+| Cyrene | `cyrene` | The built-in default character — a *Honkai: Star Rail* fan-made persona with its own Live2D model |
+| Generic Assistant | `generic` | A built-in example character with no IP background, reusing Cyrene's Live2D model |
+| (a pack you imported) | custom | Imported from a zip file — see below |
 
-点击卡片即可切换，改动会立刻应用到聊天窗口、桌宠、状态栏、通话窗口等所有界面。**如果新角色包带了自己的 Live2D 模型**，桌宠窗口会自动重新加载一次；只换名字/头像不会有这个动作。
+Click a card to switch; the change applies immediately across the chat window, desktop companion, status bar, call window, and every other surface. **If the new character pack ships its own Live2D model**, the desktop companion window reloads automatically; swapping only the name/avatar doesn't trigger a reload.
 
 ---
 
-## 二、自己做一个角色包
+## 2. Building your own character pack
 
-### 目录结构
+### Directory layout
 
-一个角色包就是一个文件夹，压缩成 zip 后即可导入：
+A character pack is just a folder, zipped up for import:
 
 ```
 my-pack/
-├── manifest.json          ← 必需，角色包的"身份证"
-├── avatar.png              ← 必需，头像（正方形，建议 ≥256×256）
-├── icon.png                 ← 可选，应用图标（暂未接入选择界面，预留字段）
-├── prompts/                 ← 必需，完整的人设 prompt 文件集
+├── manifest.json          ← required — the pack's "ID card"
+├── avatar.png              ← required — avatar (square, ≥256×256 recommended)
+├── icon.png                 ← optional — app icon (not yet wired into the picker UI; reserved field)
+├── prompts/                 ← required — the complete set of persona prompt files
 │   ├── chat_system.md
 │   ├── chat_identity.md
 │   ├── soul.md
@@ -46,21 +48,21 @@ my-pack/
 │   ├── code_remark.md
 │   ├── phone_system.md
 │   └── phone_identity.md
-└── model/                   ← 可选，自定义 Live2D 模型（不提供则复用内置昔涟形象）
-    └── ...（Cubism 4 模型文件，与 .model3.json 入口）
+└── model/                   ← optional — custom Live2D model (falls back to the built-in Cyrene model if omitted)
+    └── ...(Cubism 4 model files, with a .model3.json entry point)
 ```
 
-打包时，`manifest.json` 必须在 zip **顶层**（不要多包一层 `my-pack/` 目录），否则会被判定为"缺少 manifest.json"。
+When zipping the pack, `manifest.json` must sit at the **top level** of the zip (don't wrap everything in an extra `my-pack/` folder) — otherwise the import will report "manifest.json not found."
 
-### manifest.json 字段
+### manifest.json fields
 
 ```json
 {
   "schemaVersion": 1,
   "id": "my-pack",
-  "displayName": "小明",
-  "author": "你的名字（可选）",
-  "description": "一句话介绍（可选）",
+  "displayName": "My Character",
+  "author": "Your name (optional)",
+  "description": "A one-line blurb (optional)",
   "avatarFile": "avatar.png",
   "iconFile": "icon.png",
   "hasCustomModel": false,
@@ -68,62 +70,62 @@ my-pack/
 }
 ```
 
-| 字段 | 必填 | 说明 |
+| Field | Required | Description |
 | --- | --- | --- |
-| `id` | ✅ | 只能是小写字母/数字/下划线/短横线，1–64 位；不能和内置包（`cyrene`、`generic`）同名 |
-| `displayName` | ✅ | 界面上显示的名字，替换掉所有原来写死的"昔涟"/"Cyrene" |
-| `avatarFile` | ✅ | 相对包目录的头像路径，必须是 png/jpg/jpeg/webp |
-| `author` / `description` | ❌ | 纯展示用 |
-| `iconFile` | ❌ | 预留字段，暂未接入应用图标选择界面 |
-| `hasCustomModel` | ❌ | 为 `true` 时必须同时提供 `modelEntryFile`，否则复用内置昔涟 Live2D 形象 |
-| `modelEntryFile` | 视情况 | `hasCustomModel: true` 时必填，指向 `.model3.json` 入口文件 |
+| `id` | ✅ | Lowercase letters/digits/underscore/hyphen only, 1–64 chars; must not collide with a built-in pack (`cyrene`, `generic`) |
+| `displayName` | ✅ | The name shown in the UI, replacing every hardcoded "Cyrene" reference |
+| `avatarFile` | ✅ | Avatar path relative to the pack folder; must be png/jpg/jpeg/webp |
+| `author` / `description` | ❌ | Display-only |
+| `iconFile` | ❌ | Reserved field; not yet wired into the app-icon picker UI |
+| `hasCustomModel` | ❌ | When `true`, `modelEntryFile` must also be provided; otherwise the built-in Cyrene Live2D model is reused |
+| `modelEntryFile` | Conditional | Required when `hasCustomModel: true`; points at the `.model3.json` entry file |
 
-### prompts/ 里必须写什么
+### What has to go in prompts/
 
-上面列出的 16 个文件**一个都不能少**，且不能是空文件——少一个，那个场景就会静默用回内置的昔涟版本，出现"只换了一半人设"的诡异效果，所以导入时会直接拒绝，而不是悄悄降级。
+**None** of the 16 files listed above may be missing, and none may be empty. Skip one, and that scenario silently falls back to the built-in Cyrene version — producing a jarring "half-swapped persona" effect — so import is rejected outright instead of silently degrading.
 
-不需要提供、会自动共用内置版本的：`tool_usage.md`、`cita_system.md`、`phone_style.md`、`styles/*.md`，以及 `worldbook/`、`moments_personas/`（这两个目录名是保留名，你的包里**不能**出现同名文件/文件夹，否则会意外遮蔽其他角色共享的内容）。
+Files that are automatically shared from the built-in set and don't need to be provided: `tool_usage.md`, `cita_system.md`, `phone_style.md`, `styles/*.md`, plus the `worldbook/` and `moments_personas/` directories (these two directory names are reserved — your pack must **not** contain files/folders with the same names, or you'll accidentally shadow content shared with other characters).
 
-最省事的起点：直接照抄 [`prompts/characters/generic/`](../../prompts/characters/generic) 这套文件——它就是一个完整、能直接导入使用的最小示例，把里面的"小助手"改成你的角色名字和说话风格即可。
+The easiest starting point: copy [`prompts/characters/generic/`](../../prompts/characters/generic) wholesale — it's a complete, ready-to-import minimal example. Just change the "Generic Assistant" persona to your character's name and speech style.
 
-### 一个格式约定：MOMENTS_CUTOFF
+### A formatting convention: MOMENTS_CUTOFF
 
-`soul.md` 里如果有一段是"角色的外貌/服装/视觉形象描述"，建议在这段前面加一行：
+If `soul.md` has a section describing the character's appearance/outfit/visual look, it's recommended to add this line right before it:
 
 ```
 <!-- MOMENTS_CUTOFF -->
 ```
 
-朋友圈动态、主动消息这类纯文字场景会自动把这个标记之后的内容裁掉——不需要在文字场景里描述"我今天穿了什么"。不加这个标记也没问题，只是整份 `soul.md` 都会被带入文字场景。
+Text-only surfaces like Moments posts and proactive messages automatically trim away everything after this marker — there's no need to describe "what I'm wearing today" in a pure-text context. Skipping the marker is fine too; it just means the entire `soul.md` gets pulled into text-only scenarios.
 
 ---
 
-## 三、导入
+## 3. Importing a pack
 
-1. 打包：把 `manifest.json`、`avatar.png`、`prompts/`（以及可选的 `icon.png`、`model/`）压成一个 zip，`manifest.json` 在压缩包根目录。
-2. 设置 → 角色 → **导入角色包（.zip）…**，选中 zip 文件。
-3. 导入成功后会出现在卡片列表里，点击即可切换。
-4. 如果 id 和已安装的包冲突，会提示是否覆盖——选"覆盖"会替换旧内容，选"取消"则本次导入作废。
+1. Package it: zip up `manifest.json`, `avatar.png`, `prompts/` (plus the optional `icon.png` and `model/`), with `manifest.json` at the root of the archive.
+2. Settings → Character → **Import Character Pack (.zip)…**, then pick the zip file.
+3. On success, it appears in the card list — click it to switch.
+4. If the `id` collides with an already-installed pack, you'll be asked whether to overwrite — choosing "Overwrite" replaces the old content, "Cancel" aborts the import.
 
-### 常见导入失败原因
+### Common import failures
 
-| 提示 | 原因 | 怎么修 |
+| Message | Cause | Fix |
 | --- | --- | --- |
-| 找不到 manifest.json | zip 里 `manifest.json` 不在顶层，或者压缩时多包了一层文件夹 | 重新打包，`manifest.json` 直接在 zip 根目录 |
-| manifest.json 字段不合法 | `id` 格式不对，或和内置包（`cyrene`/`generic`）同名 | 检查 `id` 是否只含小写字母/数字/`_`/`-` |
-| 缺少必需的人设 prompt 文件 | `prompts/` 下 16 个文件没写全，或者有空文件 | 对照上面的清单补全，可以先复制 `generic` 包再改 |
-| prompts/ 下包含保留名称 | 出现了 `worldbook` 或 `moments_personas` 同名文件/文件夹 | 删掉或改名 |
-| 找不到 manifest 里指定的头像文件 | `avatarFile` 路径写错，或文件根本没打进 zip | 确认路径拼写和大小写，确认文件确实在 zip 里 |
-| 声明了自定义模型但模型入口文件不存在 | `hasCustomModel: true` 但 `modelEntryFile` 指向的文件缺失 | 检查路径，或者干脆把 `hasCustomModel` 设为 `false` 复用内置形象 |
-| zip / 解压后体积过大 | 超过 200MB（zip）或 500MB（解压后） | 精简模型贴图体积，或去掉不必要的文件 |
+| manifest.json not found | `manifest.json` isn't at the top level of the zip, or the archive has an extra wrapping folder | Re-zip with `manifest.json` directly at the archive root |
+| manifest.json field is invalid | `id` has an invalid format, or collides with a built-in pack (`cyrene`/`generic`) | Check that `id` only contains lowercase letters/digits/`_`/`-` |
+| Missing required persona prompt files | Not all 16 files under `prompts/` are present, or some are empty | Fill in the full checklist above; copying the `generic` pack as a starting point helps |
+| prompts/ contains a reserved name | A file/folder named `worldbook` or `moments_personas` is present | Remove or rename it |
+| Avatar file referenced in manifest not found | `avatarFile` path is wrong, or the file wasn't actually included in the zip | Double-check the path spelling/casing and confirm the file is in the zip |
+| Custom model declared but the entry file is missing | `hasCustomModel: true` but the file pointed to by `modelEntryFile` is missing | Check the path, or just set `hasCustomModel` to `false` to reuse the built-in model |
+| zip / unpacked size too large | Exceeds 200MB (zip) or 500MB (unpacked) | Shrink model texture sizes, or drop unnecessary files |
 
 ---
 
-## 四、目前还做不到的事
+## 4. Current limitations
 
-角色包能换的是**名字、说话方式、头像、（可选）Live2D 模型**，以下几样暂时换不了，都是已知的限制，不是 bug：
+A character pack can swap the **name, speech style, avatar, and (optionally) Live2D model**. The following are known limitations, not bugs:
 
-- **聊天窗口的欢迎插画**：默认的"昔涟"欢迎图是手绘立绘，画进了角色形象本身，无法靠改文字解决。非默认角色包会自动退化成"头像 + 文字"的简化欢迎语，不会显示错误的插画。
-- **TTS 语音音色**：语音克隆/音色是每个用户自己在 TTS 设置里配置的账号资产，不属于角色包内容，换包不会跟着换声音。
-- **Moments（朋友圈）里"cyrene"这个内部标识**：Moments 功能里，"cyrene"是一个固定的内部身份键（决定谁的动态走哪套调度逻辑），不会随角色包改变；只有**显示给用户看的名字**会跟着换成当前角色包的 `displayName`。
-- **应用图标 / 窗口图标**：`iconFile` 字段目前只是预留，还没接入设置界面里的图标选择器。
+- **The chat window's welcome illustration** — the default "Cyrene" welcome art is a hand-drawn illustration baked into that specific character design; it can't be fixed by changing text. Non-default character packs automatically fall back to a simplified "avatar + text" welcome message instead of showing the wrong illustration.
+- **TTS voice timbre** — voice cloning/timbre is a per-user account asset configured in TTS settings, not part of the character pack's content; switching packs doesn't switch the voice.
+- **The internal "cyrene" identifier in Moments** — inside the Moments feature, "cyrene" is a fixed internal identity key (it determines which scheduling logic a given post's activity follows) and doesn't change with the character pack; only the **name shown to the user** follows the current pack's `displayName`.
+- **App icon / window icon** — the `iconFile` field is currently reserved only; it isn't wired into the icon picker in Settings yet.

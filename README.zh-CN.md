@@ -16,7 +16,7 @@
 > 将角色化聊天、个性化记忆、语音交互、工具调用与多平台接入整合在同一个桌面 Agent 中，  
 > 支持日常聊天（Chat）、辅助工作（Work）、代码协作（Code）、学习陪伴（Learn）四种对话模式。
 >
-> 通过**角色包（Character Pack）**系统，名字、人设、说话方式、头像乃至 Live2D 模型都能整体换成别的角色——内置一个不含任何 IP 背景的示例角色包可以直接切换，也可以自己做一个装进任意喜欢的二次元角色，详见[角色包使用说明](docs/user-guide/character-packs.md)。
+> 通过**角色包（Character Pack）**系统，名字、人设、说话方式、头像乃至 Live2D 模型都能整体换成别的角色——内置一个不含任何 IP 背景的示例角色包可以直接切换，也可以自己做一个装进任意喜欢的二次元角色，详见[角色包使用说明](docs/user-guide/character-packs.zh-CN.md)。
 
 > [!NOTE]
 > 本仓库 fork 自 [Playa-0v0/Cyrene-Agent](https://github.com/Playa-0v0/Cyrene-Agent)，在原项目基础上新增了角色包系统。原项目的全部功能设计与工程实现归功于原作者，本仓库的改动仅限于让"角色是谁"这件事可配置。
@@ -25,7 +25,7 @@
 
 ## ✨ 速览
 
-- 🎭 **角色包（Character Pack）** — 名字、人设、头像、Live2D 模型整体可换，内置示例角色开箱即用，也支持导入自制角色包，详见[使用说明](docs/user-guide/character-packs.md)
+- 🎭 **角色包（Character Pack）** — 名字、人设、头像、Live2D 模型整体可换，内置示例角色开箱即用，也支持导入自制角色包，详见[使用说明](docs/user-guide/character-packs.zh-CN.md)
 - 🌸 **趣味桌面陪伴** — Live2D 角色常驻桌面，支持表情、动作、状态、心情、气泡互动与智能表情包
 - 💬 **日常聊天（Chat）** — 专注角色化交流，结合会话历史、用户风格与长期记忆自然回应
 - 🛠️ **辅助工作（Work）** — 通用任务会话，支持联网搜索、文件处理、文档生成、生活服务等工具的串联调用，由 CyreneHarness 主循环统一调度
@@ -226,6 +226,10 @@ npm start
 >
 > **Windows 用户**也可以直接双击项目根目录的 `setup.bat` 完成依赖安装、构建和 `npm link`，之后双击 `start.bat` 即可启动。
 
+> [!TIP]
+>
+> 如果启动时报错 **"Unable to find Electron app"** 或提示找不到 `dist\main\main\index.js`（Windows/macOS/Linux 皆可能出现），说明 `npm run build` 还没有成功跑完就执行了 `npm start` / `cyrene run` / `start.bat`。`dist/` 是被 `.gitignore` 忽略的构建产物，只有 `npm run build` 成功执行后才会生成 `dist/main/main/index.js`；单独 `npm install` 或 `git pull`/`git clone` 不会产生它。按顺序重新执行 `npm install && npm run build && npm start` 即可解决；若 `npm run build` 本身报错，需先排查该报错。
+
 开发模式：
 
 ```bash
@@ -278,7 +282,7 @@ npm run package:win:dir
 - **智能表情包** — 内置贴纸面板，并可通过语义匹配自动选择符合当前语境的表情包。
 - **多窗口交互** — 桌宠、聊天、设置、任务、通话和贴纸管理等界面相互独立，又共享统一运行状态。
 - **个性化外观** — 支持界面主题、聊天样式与字体选择。
-- **角色包（Character Pack）** — 名字、人设、头像乃至 Live2D 模型可整体替换为其他角色，内置示例包开箱即用，也支持导入自制的 zip 角色包；详见[角色包使用说明](docs/user-guide/character-packs.md)。
+- **角色包（Character Pack）** — 名字、人设、头像乃至 Live2D 模型可整体替换为其他角色，内置示例包开箱即用，也支持导入自制的 zip 角色包；详见[角色包使用说明](docs/user-guide/character-packs.zh-CN.md)。
 
 #### 💬 日常聊天（Chat）
 

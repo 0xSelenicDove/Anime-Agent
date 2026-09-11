@@ -56,6 +56,7 @@ function channelName(channel: IncomingMessage["channel"]): string {
     case "feishu": return "飞书";
     case "qq": return "QQ";
     case "qqbot": return "QQ 机器人";
+    case "discord": return "Discord";
     default: return channel;
   }
 }

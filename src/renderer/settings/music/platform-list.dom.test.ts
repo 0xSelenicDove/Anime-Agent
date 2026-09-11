@@ -12,7 +12,7 @@ function musicPlatformNames(): string[] {
 }
 
 describe("音乐工具入口", () => {
-  it("只展示已经支持的网易云音乐和本地音乐", () => {
-    expect(musicPlatformNames()).toEqual(["网易云音乐", "本地音乐"]);
+  it("只展示已经支持的网易云音乐、本地音乐和 Spotify", () => {
+    expect(musicPlatformNames()).toEqual(["网易云音乐", "本地音乐", "Spotify"]);
   });
 });

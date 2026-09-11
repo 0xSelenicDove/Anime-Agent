@@ -1290,6 +1290,45 @@
             </div>
           </div>
 
+          <div class="channels-card">
+            <div class="channels-card__header">
+              <h2>Discord</h2>
+              <span class="switch"><input id="channels-discord-enabled" type="checkbox" /><span class="switch__track"><span class="switch__thumb"></span></span></span>
+            </div>
+            <div class="channels-card__body">
+              <div class="channels-status" id="channels-discord-status">
+                <span class="channels-status__dot channels-status__dot--offline"></span>
+                <span class="channels-status__text">未启用</span>
+              </div>
+              <p class="channels-card__hint">
+                在 discord.com/developers/applications 创建一个 Application，在 Bot 页生成 Bot Token；
+                需在 Privileged Gateway Intents 中开启 MESSAGE CONTENT INTENT，否则收不到消息正文。
+                Bot 可随时主动发消息，没有被动回复的次数/时间限制；服务器内仅响应 @ 机器人 的消息。
+              </p>
+              <div class="form-row">
+                <label class="form-label" for="channels-discord-bot-token">Bot Token</label>
+                <input type="password" id="channels-discord-bot-token" class="form-input form-input--wide" placeholder="点击保存配置时自动加密保存" autocomplete="off" />
+              </div>
+              <div class="form-row">
+                <label class="form-label" for="channels-discord-allow-any-dm">放行所有私信</label>
+                <span class="switch"><input id="channels-discord-allow-any-dm" type="checkbox" /><span class="switch__track"><span class="switch__thumb"></span></span></span>
+              </div>
+              <div class="form-row">
+                <label class="form-label" for="channels-discord-user-allowlist">私信用户 id 白名单</label>
+                <textarea id="channels-discord-user-allowlist" class="form-input form-input--wide" rows="3" placeholder="每行一个用户 id（Discord 内右键用户 → 复制用户 ID，需先开启开发者模式）；不知道对方 id 时，先让对方私信机器人，此处会显示被拒的 id"></textarea>
+              </div>
+              <div class="form-row">
+                <label class="form-label" for="channels-discord-guild-allowlist">服务器 id 白名单</label>
+                <textarea id="channels-discord-guild-allowlist" class="form-input form-input--wide" rows="3" placeholder="每行一个服务器（Server/Guild）id；服务器内还必须 @ 机器人"></textarea>
+              </div>
+              <div class="channels-card__actions">
+                <button type="button" class="btn-secondary" id="channels-discord-save">保存并连接</button>
+                <button type="button" class="btn-secondary" id="channels-discord-test">测试连接</button>
+              </div>
+              <div class="channels-feedback" id="channels-discord-feedback"></div>
+            </div>
+          </div>
+
           <div class="channels-card channels-card--global">
             <div class="channels-card__header">
               <h2>上下文绑定</h2>
@@ -1567,6 +1606,12 @@
                     </div>
                     <span class="plugin-placeholder-tag is-hidden" id="local-tag"></span>
                   </article>
+                  <button type="button" class="plugin-card plugin-card--sub music-platform" id="music-platform-spotify" data-platform="spotify">
+                    <div class="plugin-card__icon" aria-hidden="true" style="color:#1DB954">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M7 10.2c3-1 7-.6 9.4.9M7.4 13.3c2.4-.7 5.6-.4 7.6.8M7.8 16.1c1.9-.5 4.3-.3 5.8.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    </div>
+                    <div class="plugin-card__body"><h2>Spotify</h2><p>连接后可用 Spotify Connect 遥控已打开的设备播放。</p></div>
+                  </button>
                 </div>
               </div>
             </article>
@@ -1605,6 +1650,24 @@
             <div class="music-qr is-hidden" id="music-qr"><img class="music-qr__img" id="music-qr-img" alt="网易云登录二维码" /><div><strong>网易云音乐 App 扫码</strong><p id="music-qr-tip">请用网易云音乐 App 扫描二维码完成登录</p><p id="music-qr-status">当前状态：等待扫码</p></div></div>
             <div class="music-search-card music-card" id="music-search-card"><div class="music-card__header"><h2>搜索歌曲</h2></div><div class="music-card__body"><p id="music-search-hint" class="panel-hint">连接网易云后即可搜索歌曲和获取每日推荐。</p><div id="music-search-form" class="form-input-with-action is-hidden"><input type="text" id="music-search-input" class="form-input form-input--wide" placeholder="输入歌名或歌手" autocomplete="off" /><button type="button" class="btn-secondary" id="music-search-btn">搜索</button></div><div class="music-search-results" id="music-search-results"><p class="empty-hint">连接网易云后即可搜索歌曲和获取每日推荐。</p></div></div></div>
             <div class="music-feedback" id="music-feedback"></div>
+          </div>
+          <div id="spotify-detail-view" class="is-hidden">
+            <button type="button" class="music-return-btn" id="spotify-return-btn">← 返回音乐平台</button>
+            <header class="music-detail-header"><div class="plugin-card__icon" aria-hidden="true" style="color:#1DB954;width:32px;height:32px"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M7 10.2c3-1 7-.6 9.4.9M7.4 13.3c2.4-.7 5.6-.4 7.6.8M7.8 16.1c1.9-.5 4.3-.3 5.8.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><div><h1>Spotify</h1><p>通过 Spotify Connect 遥控已打开 Spotify 的设备（手机 / 电脑 / 网页），需要 Premium 账号。</p></div></header>
+            <div class="music-card music-openapi-card" id="spotify-config-card">
+              <div class="music-card__header"><h2>应用配置</h2></div>
+              <div class="music-card__body">
+                <p class="panel-hint">在 <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener noreferrer">developer.spotify.com/dashboard</a> 创建一个 App 拿到 Client ID；并把下面这个 Redirect URI 原样加进该 App 的设置：<code id="spotify-redirect-uri">http://127.0.0.1:61823/callback</code></p>
+                <label class="form-label" for="spotify-client-id">Client ID</label>
+                <input type="text" id="spotify-client-id" class="form-input form-input--wide" placeholder="在 Spotify 开发者后台创建的 App 的 Client ID" autocomplete="off" />
+              </div>
+            </div>
+            <div class="music-card music-status-card">
+              <div class="music-status-main"><span class="music-status-dot" id="spotify-status-dot"></span><strong id="spotify-account-status-text">尚未连接</strong><span id="spotify-status-description"></span></div>
+              <div class="music-actions" id="spotify-actions"><button type="button" class="btn-primary" id="spotify-login-btn">连接 Spotify</button></div>
+            </div>
+            <div class="music-search-card music-card" id="spotify-search-card"><div class="music-card__header"><h2>搜索歌曲</h2></div><div class="music-card__body"><p id="spotify-search-hint" class="panel-hint">连接 Spotify 后即可搜索并遥控播放。</p><div id="spotify-search-form" class="form-input-with-action is-hidden"><input type="text" id="spotify-search-input" class="form-input form-input--wide" placeholder="输入歌名或歌手" autocomplete="off" /><button type="button" class="btn-secondary" id="spotify-search-btn">搜索</button></div><div class="music-search-results" id="spotify-search-results"><p class="empty-hint">连接 Spotify 后即可搜索并遥控播放。</p></div></div></div>
+            <div class="music-feedback" id="spotify-feedback"></div>
           </div>
         </section>
 

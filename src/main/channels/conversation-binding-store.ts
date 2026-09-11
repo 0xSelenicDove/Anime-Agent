@@ -38,7 +38,7 @@ function emptyState(): PersistedBindingState {
 }
 
 function isChannelId(value: unknown): value is ChannelId {
-  return value === "wechat" || value === "feishu" || value === "qq" || value === "qqbot";
+  return value === "wechat" || value === "feishu" || value === "qq" || value === "qqbot" || value === "discord";
 }
 
 function isExternalChat(value: unknown): value is ExternalChannelChat {

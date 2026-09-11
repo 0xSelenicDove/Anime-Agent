@@ -423,6 +423,8 @@ export const IPC = {
   CHANNELS_QQ_TEST_CONNECTION: "channels:qq:test-connection",
   // QQ 官方机器人（QQ 开放平台）专属
   CHANNELS_QQBOT_TEST_CONNECTION: "channels:qqbot:test-connection",
+  // Discord 专属
+  CHANNELS_DISCORD_TEST_CONNECTION: "channels:discord:test-connection",
   // 消息日志
   CHANNELS_LOG_GET: "channels:log:get",
   CHANNELS_LOG_CLEAR: "channels:log:clear",
@@ -476,6 +478,25 @@ export const IPC = {
   MUSIC_IMPORT_LOCAL_FOLDER: "music:import-local-folder",
   // main → renderer：缓存索引变化（下载完成/删除/导入）广播
   MUSIC_CACHE_UPDATED: "music:cache-updated",
+
+  // Spotify（Connect 遥控，非本地播放 —— 见 src/main/music/spotify/spotify-client.ts）
+  SPOTIFY_GET_STATUS: "spotify:get-status",
+  SPOTIFY_GET_CONFIG: "spotify:get-config",
+  SPOTIFY_SAVE_CONFIG: "spotify:save-config",
+  SPOTIFY_BEGIN_LOGIN: "spotify:begin-login",
+  SPOTIFY_CANCEL_LOGIN: "spotify:cancel-login",
+  SPOTIFY_LOGOUT: "spotify:logout",
+  SPOTIFY_SEARCH: "spotify:search",
+  SPOTIFY_GET_DEVICES: "spotify:get-devices",
+  SPOTIFY_GET_PLAYBACK_STATE: "spotify:get-playback-state",
+  SPOTIFY_PLAY_TRACK: "spotify:play-track",
+  SPOTIFY_PLAYBACK_PAUSE: "spotify:playback:pause",
+  SPOTIFY_PLAYBACK_RESUME: "spotify:playback:resume",
+  SPOTIFY_PLAYBACK_NEXT: "spotify:playback:next",
+  SPOTIFY_PLAYBACK_PREV: "spotify:playback:prev",
+  SPOTIFY_SET_VOLUME: "spotify:set-volume",
+  // main → renderer
+  SPOTIFY_STATE_CHANGED: "spotify:state-changed",
 
   // screenshot
   SCREENSHOT_START: "screenshot:start",

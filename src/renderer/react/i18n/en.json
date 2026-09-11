@@ -103,6 +103,7 @@
       "feishu": "Feishu",
       "qq": "QQ",
       "qqbot": "QQ Bot",
+      "discord": "Discord",
       "unknown": "External channel",
       "sameConversation": "{{channels}} · same conversation"
     }

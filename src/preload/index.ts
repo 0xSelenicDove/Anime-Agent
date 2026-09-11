@@ -14,6 +14,7 @@ import type { AguiRunAck } from "../shared/run-terminal";
 import type { ReviewSnapshot, ReviewRestoreOutcome } from "../shared/review-types";
 import { getLive2DIpcListenerCounts } from "./live2d-listener-diagnostics";
 import { exposeMusicApi } from "./music";
+import { exposeSpotifyApi } from "./spotify";
 import { normalizeChatAppearance, type ChatAppearanceSettings } from "../shared/chat-appearance";
 import type { AppUpdateApi, AppUpdateState } from "../shared/app-update";
 import type { ConversationMode } from "../shared/chat-types";
@@ -444,6 +445,7 @@ const settingsApi = {
   channelsFeishuTestWebhookReachable: () => ipcRenderer.invoke(IPC.CHANNELS_FEISHU_TEST_WEBHOOK_REACHABLE),
   channelsQqTestConnection: () => ipcRenderer.invoke(IPC.CHANNELS_QQ_TEST_CONNECTION),
   channelsQqBotTestConnection: () => ipcRenderer.invoke(IPC.CHANNELS_QQBOT_TEST_CONNECTION),
+  channelsDiscordTestConnection: () => ipcRenderer.invoke(IPC.CHANNELS_DISCORD_TEST_CONNECTION),
   // 消息日志
   channelsLogGet: (limit?: number) => ipcRenderer.invoke(IPC.CHANNELS_LOG_GET, limit ?? 100),
   channelsLogClear: () => ipcRenderer.invoke(IPC.CHANNELS_LOG_CLEAR),
@@ -913,3 +915,4 @@ const ttsApi = {
 contextBridge.exposeInMainWorld("tts", ttsApi);
 
 exposeMusicApi();
+exposeSpotifyApi();
