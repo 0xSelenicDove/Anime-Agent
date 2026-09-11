@@ -72,7 +72,7 @@ body {
   white-space: nowrap;
 }
 
-/* 标题栏头像：默认主题白线条 PNG，白调主题切黑色线条 SVG。 */
+/* 标题栏头像：默认主题白线条 PNG，白调主题用 filter 转为黑色线条，避免再拉一份 SVG 资源。 */
 .sidebar__name-avatar {
   display: block;
   width: 20px;
@@ -83,8 +83,7 @@ body {
 }
 
 [data-ui-theme="pearl-white"] .sidebar__name-avatar {
-  content: url("/icons/cyrene-avatar-line.svg");
-  display: block;
+  filter: brightness(0);
 }
 
 .sidebar__hint {
