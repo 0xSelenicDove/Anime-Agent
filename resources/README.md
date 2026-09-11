@@ -4,7 +4,8 @@
 
 | 路径 | 来源 | Git 状态 | 用途 |
 | --- | --- | --- | --- |
-| `bin/cyrene-screenshot.exe` | `npm run build:screenshot-helper` | 忽略 | 截图辅助程序；打包时复制到发布包的 `bin/`。 |
+| `bin/cyrene-screenshot.exe` | `npm run build:screenshot-helper`（Windows） | 忽略 | 截图辅助程序；打包时复制到发布包的 `bin/`。 |
+| `bin/cyrene-screenshot` | `npm run build:screenshot-helper`（macOS，arm64+x64 universal） | 忽略 | 截图辅助程序；打包时复制到发布包的 `bin/`。 |
 | `bin/mpv/` | `npm run prepare:mpv` | 忽略 | mpv 媒体播放器（Windows x86_64）；打包时复制到发布包的 `bin/mpv/`，供音乐后端调用。 |
 | `mingit/` | `npm run prepare:mingit` | 忽略 | MinGit 回退方案；优先使用用户系统已安装的 Git。 |
 

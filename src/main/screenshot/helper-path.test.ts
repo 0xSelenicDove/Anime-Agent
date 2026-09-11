@@ -32,23 +32,43 @@ describe("resolveScreenshotHelperPath", () => {
     })).toBe("D:\\debug\\cyrene-screenshot.exe");
   });
 
-  it("returns null on non-Windows platforms since no native helper is built for them", () => {
+  it("uses the development Rust release binary on macOS", () => {
+    expect(resolveScreenshotHelperPath({
+      isPackaged: false,
+      appPath: "/repo",
+      resourcesPath: "/repo/resources",
+      envOverride: undefined,
+      platform: "darwin",
+    })).toBe("/repo/native/cyrene-screenshot/target/release/cyrene-screenshot");
+  });
+
+  it("uses the packaged resources binary on macOS", () => {
     expect(resolveScreenshotHelperPath({
       isPackaged: true,
       appPath: "/Applications/Cyrene.app/Contents/Resources/app.asar",
       resourcesPath: "/Applications/Cyrene.app/Contents/Resources",
       envOverride: undefined,
       platform: "darwin",
+    })).toBe("/Applications/Cyrene.app/Contents/Resources/bin/cyrene-screenshot");
+  });
+
+  it("returns null on platforms with no native helper build (e.g. Linux)", () => {
+    expect(resolveScreenshotHelperPath({
+      isPackaged: true,
+      appPath: "/opt/cyrene/resources/app.asar",
+      resourcesPath: "/opt/cyrene/resources",
+      envOverride: undefined,
+      platform: "linux",
     })).toBeNull();
   });
 
-  it("still honors an explicit override on non-Windows platforms", () => {
+  it("still honors an explicit override on unsupported platforms", () => {
     expect(resolveScreenshotHelperPath({
       isPackaged: false,
       appPath: "/repo",
       resourcesPath: "/repo/resources",
       envOverride: "/usr/local/bin/cyrene-screenshot",
-      platform: "darwin",
+      platform: "linux",
     })).toBe("/usr/local/bin/cyrene-screenshot");
   });
 });

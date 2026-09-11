@@ -88,5 +88,12 @@ where
 
 pub fn run() -> Result<(), AppError> {
     let options = parse_arguments(std::env::args().skip(1))?;
-    crate::app::run(options)
+    #[cfg(windows)]
+    {
+        crate::app::run(options)
+    }
+    #[cfg(target_os = "macos")]
+    {
+        crate::mac_app::run(options)
+    }
 }

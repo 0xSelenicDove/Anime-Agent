@@ -3,15 +3,30 @@ import type { ScreenshotInsertPayload } from "../../shared/ipc-channels";
 import type { ScreenshotHelperClient } from "./helper-client";
 
 /**
- * The capture helper is Win32-only (see helper-path.ts) and always reports Windows
- * paths, so this always applies win32 URL conversion regardless of the host platform
- * running the code — `url.pathToFileURL` would instead apply native (POSIX-on-Mac/
- * Linux) semantics and mangle a "C:\\..." path.
+ * The capture helper always reports paths matching the platform it was built
+ * for (Win32 backslash paths or macOS POSIX paths — see helper-path.ts), which
+ * is always the same platform this code is running on (a given Electron build
+ * only ever spawns its own platform's helper). `platform` is threaded through
+ * explicitly (defaulting to `process.platform`) rather than switching on
+ * `path.sep` so tests can exercise both branches deterministically regardless
+ * of the host CI platform — `url.pathToFileURL` can't be used here since it
+ * applies the *actual* host platform's semantics, which would mangle a
+ * "C:\\..." path when a test simulates Windows on a non-Windows CI host.
  */
 function win32PathToFileUrl(win32Path: string): string {
   const resolved = path.win32.resolve(win32Path);
   const [drive, ...segments] = resolved.split(path.win32.sep).filter(Boolean);
   return `file:///${drive}/${segments.map(encodeURIComponent).join("/")}`;
+}
+
+function posixPathToFileUrl(posixPath: string): string {
+  const resolved = path.posix.resolve(posixPath);
+  const segments = resolved.split(path.posix.sep).filter(Boolean);
+  return `file:///${segments.map(encodeURIComponent).join("/")}`;
+}
+
+function pathToFileUrl(resolvedPath: string, platform: NodeJS.Platform): string {
+  return platform === "win32" ? win32PathToFileUrl(resolvedPath) : posixPathToFileUrl(resolvedPath);
 }
 
 export type ScreenshotInsertData = ScreenshotInsertPayload;
@@ -46,19 +61,22 @@ export function validateScreenshotInsert(
   data: ScreenshotInsertCandidate,
   screenshotDirectory: string,
   loadImage: (filePath: string) => ScreenshotImageProbe,
+  platform: NodeJS.Platform = process.platform,
 ): ScreenshotInsertData | null {
-  // The native capture helper is Win32-only today (see helper-path.ts), so every
-  // filePath it produces is a Windows path regardless of the host platform running
-  // this validation — path.win32 here is intentional, not a portability bug.
-  const root = path.win32.resolve(screenshotDirectory);
-  const filePath = path.win32.resolve(data.filePath);
-  const relative = path.win32.relative(root, filePath);
+  // The native capture helper's filePath always matches the platform it was
+  // built for (win32 or macOS — see helper-path.ts), which is always the
+  // platform this code is running on in production; `platform` is threaded
+  // through explicitly so tests can exercise both branches deterministically.
+  const p = platform === "win32" ? path.win32 : path.posix;
+  const root = p.resolve(screenshotDirectory);
+  const filePath = p.resolve(data.filePath);
+  const relative = p.relative(root, filePath);
   if (
     relative.length === 0
     || relative === ".."
-    || relative.startsWith(`..${path.win32.sep}`)
-    || path.win32.isAbsolute(relative)
-    || path.win32.extname(filePath).toLowerCase() !== ".png"
+    || relative.startsWith(`..${p.sep}`)
+    || p.isAbsolute(relative)
+    || p.extname(filePath).toLowerCase() !== ".png"
   ) {
     return null;
   }
@@ -77,7 +95,7 @@ export function validateScreenshotInsert(
   return {
     ...data,
     filePath,
-    previewUrl: win32PathToFileUrl(filePath),
+    previewUrl: pathToFileUrl(filePath, platform),
   };
 }
 
@@ -136,7 +154,7 @@ export function createScreenshotService(deps: ScreenshotServiceDeps): Screenshot
         width: result.width,
         height: result.height,
         mime: result.mime,
-        previewUrl: win32PathToFileUrl(result.filePath),
+        previewUrl: pathToFileUrl(result.filePath, process.platform),
         hasAnnotations: result.hasAnnotations,
       });
       return { ok: true };

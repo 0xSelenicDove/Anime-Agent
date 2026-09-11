@@ -6,6 +6,7 @@ pub enum AppError {
     ProtocolVersionMismatch { provided: u32, expected: u32 },
     #[error("not-implemented: graphical capture initialization")]
     NotImplemented,
+    #[cfg(windows)]
     #[error("Windows API failed: {0}")]
     Windows(#[from] windows::core::Error),
     #[error("I/O failed: {0}")]
@@ -20,6 +21,7 @@ impl AppError {
             Self::InvalidArguments(_) => "invalid-arguments",
             Self::ProtocolVersionMismatch { .. } => "protocol-version-mismatch",
             Self::NotImplemented => "not-implemented",
+            #[cfg(windows)]
             Self::Windows(_) => "windows-api-failed",
             Self::Io(_) => "io-failed",
             Self::Runtime(_) => "runtime-failed",
@@ -46,7 +48,7 @@ impl ProtocolError {
 
 /// Errors that arise while the helper is actively serving a screenshot
 /// request: display query, capture backend, geometry transforms, and the
-/// underlying Windows APIs. These are distinct from `AppError`/`ProtocolError`
+/// underlying platform APIs. These are distinct from `AppError`/`ProtocolError`
 /// (which describe runtime/process-level failures and the IPC protocol).
 #[derive(Debug, thiserror::Error)]
 pub enum HelperError {
@@ -58,8 +60,17 @@ pub enum HelperError {
     InvalidDisplay(String),
     #[error("encode failed: {0}")]
     EncodeFailed(String),
+    #[cfg(windows)]
     #[error("Windows API failed: {0}")]
     Windows(#[from] windows::core::Error),
+    /// Non-Windows platform API failure (e.g. a Core Graphics / AppKit call
+    /// that reported failure without a rich error type of its own).
+    #[error("platform API failed: {0}")]
+    PlatformApi(String),
+    /// The OS denied screen-recording access (macOS TCC) and the user did not
+    /// grant it when prompted.
+    #[error("screen recording permission was denied")]
+    PermissionDenied,
 }
 
 impl HelperError {
@@ -69,7 +80,10 @@ impl HelperError {
             Self::CaptureFailed(_) => "capture-failed",
             Self::InvalidDisplay(_) => "invalid-display",
             Self::EncodeFailed(_) => "encode-failed",
+            #[cfg(windows)]
             Self::Windows(_) => "windows-api-failed",
+            Self::PlatformApi(_) => "platform-api-failed",
+            Self::PermissionDenied => "screen-recording-permission-denied",
         }
     }
 }

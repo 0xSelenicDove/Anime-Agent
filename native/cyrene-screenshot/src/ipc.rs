@@ -7,6 +7,7 @@ use std::{
     thread,
 };
 
+#[cfg(windows)]
 use windows::Win32::{
     Foundation::{HWND, LPARAM, WPARAM},
     UI::WindowsAndMessaging::PostMessageW,
@@ -42,9 +43,11 @@ pub struct InputBatch {
     pub events: Vec<Event>,
 }
 
+#[cfg(windows)]
 #[derive(Clone, Copy)]
 pub struct MessageTarget(usize);
 
+#[cfg(windows)]
 impl MessageTarget {
     pub fn new(hwnd: HWND) -> Self {
         Self(hwnd.0 as usize)
@@ -55,6 +58,29 @@ impl MessageTarget {
         // SAFETY: The HWND was created before MessageTarget was published. Message
         // parameters are deliberately zero; all command data stays in the channel.
         unsafe { PostMessageW(Some(hwnd), message, WPARAM(0), LPARAM(0)) }
+    }
+}
+
+/// macOS has no message-only-window / `PostMessageW` equivalent to wake a
+/// specific thread's queue, and doesn't need one: `mac_app`'s run loop polls
+/// the command/event channels on a short bounded `CFRunLoopRunInMode`
+/// timeout every iteration (mirroring the same bounded-wait pattern the
+/// Windows loop already uses for its idle capture-refresh pump), so a missed
+/// wake only costs up to one poll interval of latency. `post` is therefore a
+/// no-op kept only so `InputGate`/`parent_watch` compile unchanged across
+/// platforms.
+#[cfg(target_os = "macos")]
+#[derive(Clone, Copy)]
+pub struct MessageTarget;
+
+#[cfg(target_os = "macos")]
+impl MessageTarget {
+    pub fn new() -> Self {
+        Self
+    }
+
+    pub fn post(self, _message: u32) -> Result<(), ()> {
+        Ok(())
     }
 }
 

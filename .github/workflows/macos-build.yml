@@ -28,8 +28,16 @@ jobs:
       - name: Build
         run: npm run build
 
+      # GitHub's macos-latest runners ship rustup with only the host's native
+      # target installed; the screenshot helper build (invoked by
+      # package:mac:dir below) needs both Apple Silicon and Intel targets to
+      # produce a universal binary via lipo.
+      - name: Install Rust targets for the screenshot helper
+        run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+
       # Unsigned --dir pack: catches electron-builder.mac.yml / icon / entitlements
-      # regressions without needing Apple signing credentials in CI.
+      # regressions without needing Apple signing credentials in CI. Also builds
+      # and stages the native screenshot helper (see package:mac:dir).
       - name: Package (unsigned, unpacked)
         run: npm run package:mac:dir
         env:

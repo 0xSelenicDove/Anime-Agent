@@ -269,32 +269,10 @@ pub enum RefreshOutcome {
     Lost,
 }
 
-/// Counters that prove the GPU capture path is delivering on its promise: no
-/// full-screen CPU readback between `Start` and `overlay-visible`, and
-/// exactly one selection readback at commit.
-///
-/// Fields are cumulative monotonic counters exposed on the wire via
-/// `Event::OverlayVisible` and `Event::CaptureReleased` so integration tests
-/// can assert the documented invariants without a private inspector.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, serde::Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct CaptureDiagnostics {
-    /// Stable backend identifier surfaced on the wire (e.g. `"dxgi"`, `"gdi"`).
-    pub backend: &'static str,
-    /// Total `Map`/`BitBlt` operations that pulled a full display-sized buffer
-    /// back to the CPU. DXGI must keep this at zero between `Start` and
-    /// `overlay-visible`.
-    pub full_frame_cpu_readbacks: u64,
-    /// Total `Map`/`BitBlt` operations that pulled the *selection* rectangle
-    /// (or smaller) back to the CPU. Both backends increment this at commit.
-    pub selection_cpu_readbacks: u64,
-    /// Times `AcquireNextFrame` returned `S_OK` (DXGI) or freeze succeeded
-    /// (GDI). GDI counts a single 1 here at first freeze.
-    pub latest_copies: u64,
-    /// Times the DXGI duplication + textures were rebuilt (ACCESS_LOST,
-    /// display change, DPI change). Zero on a healthy desktop.
-    pub duplication_rebuilds: u64,
-}
+/// Moved to `crate::diagnostics` so the platform-neutral `protocol::Event`
+/// doesn't have to name the `win` module. Re-exported here so existing
+/// in-module references (`CaptureDiagnostics`) keep resolving unchanged.
+pub use crate::diagnostics::CaptureDiagnostics;
 
 /// Capture backend capability surface.
 ///

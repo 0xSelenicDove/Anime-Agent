@@ -2,7 +2,6 @@ use cyrene_screenshot::cli::parse_arguments;
 use cyrene_screenshot::protocol::{
     CaptureMode, Command, Event, MAX_NDJSON_LINE_BYTES, parse_command_line,
 };
-use std::path::PathBuf;
 
 #[test]
 fn parses_clipboard_only_start() {
@@ -46,9 +45,13 @@ fn rejects_oversized_line() {
 
 #[test]
 fn parses_required_cli_arguments() {
+    // `std::env::temp_dir()` is always absolute on every platform this crate
+    // targets, unlike a hardcoded `C:\...` literal (which `Path::is_absolute`
+    // only recognizes on Windows) — this keeps the test meaningful cross-platform.
+    let output_dir = std::env::temp_dir().join("cyrene-screenshots");
     let options = parse_arguments([
         "--output-dir",
-        r"C:\Temp\cyrene-screenshots",
+        output_dir.to_str().expect("temp dir path must be UTF-8"),
         "--protocol-version",
         "1",
         "--parent-pid",
@@ -56,10 +59,7 @@ fn parses_required_cli_arguments() {
     ])
     .unwrap();
 
-    assert_eq!(
-        options.output_dir,
-        PathBuf::from(r"C:\Temp\cyrene-screenshots")
-    );
+    assert_eq!(options.output_dir, output_dir);
     assert_eq!(options.protocol_version, 1);
     assert_eq!(options.parent_pid, 1);
 }

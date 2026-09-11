@@ -105,16 +105,22 @@ export function parseHelperEvent(line: string): HelperEvent {
   }
 }
 
-export function resolveCompletedFile(outputDirectory: string, fileName: string): string {
+export function resolveCompletedFile(
+  outputDirectory: string,
+  fileName: string,
+  platform: NodeJS.Platform = process.platform,
+): string {
   if (!UUID_V4_PNG_FILE_NAME.test(fileName)) {
     throw new Error("INVALID_SCREENSHOT_FILE_NAME");
   }
-  // The helper is Win32-only (see helper-path.ts) and always reports a Windows
-  // outputDirectory, so path.win32 is used regardless of the host platform running
-  // this code.
-  const directory = path.win32.resolve(outputDirectory);
-  const resolved = path.win32.resolve(directory, fileName);
-  if (path.win32.dirname(resolved) !== directory) {
+  // The helper always reports an outputDirectory matching the platform it was
+  // built for (win32 or macOS — see helper-path.ts), which is always the
+  // platform this code is running on in production; `platform` is threaded
+  // through explicitly so tests can exercise both branches deterministically.
+  const p = platform === "win32" ? path.win32 : path.posix;
+  const directory = p.resolve(outputDirectory);
+  const resolved = p.resolve(directory, fileName);
+  if (p.dirname(resolved) !== directory) {
     throw new Error("INVALID_SCREENSHOT_FILE_NAME");
   }
   return resolved;

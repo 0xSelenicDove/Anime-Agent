@@ -1,3 +1,4 @@
+use crate::diagnostics::CaptureDiagnostics;
 use crate::error::ProtocolError;
 
 pub const PROTOCOL_VERSION: u32 = 1;
@@ -49,7 +50,7 @@ pub enum Event {
         request_id: String,
         #[serde(rename = "freezeDurationMs")]
         freeze_duration_ms: u64,
-        diagnostics: crate::win::capture::CaptureDiagnostics,
+        diagnostics: CaptureDiagnostics,
     },
     InteractionState {
         #[serde(rename = "requestId")]
@@ -63,7 +64,7 @@ pub enum Event {
         clipboard_written: bool,
         width: u32,
         height: u32,
-        diagnostics: crate::win::capture::CaptureDiagnostics,
+        diagnostics: CaptureDiagnostics,
     },
     Completed {
         #[serde(rename = "requestId")]

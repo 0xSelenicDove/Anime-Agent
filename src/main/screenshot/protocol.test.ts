@@ -36,15 +36,28 @@ describe("screenshot helper protocol", () => {
   });
 
   it("rejects path traversal file names", () => {
-    expect(() => resolveCompletedFile("C:\\shots", "..\\evil.png")).toThrow("INVALID_SCREENSHOT_FILE_NAME");
+    expect(() => resolveCompletedFile("C:\\shots", "..\\evil.png", "win32")).toThrow("INVALID_SCREENSHOT_FILE_NAME");
   });
 
   it("accepts only UUID v4 png names", () => {
     expect(resolveCompletedFile(
       "C:\\shots",
       "00000000-0000-4000-8000-000000000001.png",
+      "win32",
     )).toBe("C:\\shots\\00000000-0000-4000-8000-000000000001.png");
-    expect(() => resolveCompletedFile("C:\\shots", "00000000-0000-1000-8000-000000000001.png"))
+    expect(() => resolveCompletedFile("C:\\shots", "00000000-0000-1000-8000-000000000001.png", "win32"))
       .toThrow("INVALID_SCREENSHOT_FILE_NAME");
+  });
+
+  it("accepts only UUID v4 png names on macOS (POSIX paths)", () => {
+    expect(resolveCompletedFile(
+      "/Users/test/Library/Application Support/Cyrene/screenshots",
+      "00000000-0000-4000-8000-000000000001.png",
+      "darwin",
+    )).toBe("/Users/test/Library/Application Support/Cyrene/screenshots/00000000-0000-4000-8000-000000000001.png");
+  });
+
+  it("rejects path traversal file names on macOS", () => {
+    expect(() => resolveCompletedFile("/Users/test/screenshots", "../evil.png", "darwin")).toThrow("INVALID_SCREENSHOT_FILE_NAME");
   });
 });

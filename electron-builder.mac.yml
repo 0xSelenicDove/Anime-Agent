@@ -26,6 +26,8 @@ extraFiles:
   - from: skills
     to: skills
 extraResources:
+  - from: resources/bin/cyrene-screenshot
+    to: bin/cyrene-screenshot
   - from: resources/components
     to: components
   - from: vendor/cyrene-skills

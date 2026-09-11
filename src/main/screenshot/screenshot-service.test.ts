@@ -66,26 +66,36 @@ describe("createScreenshotService", () => {
   });
 
   it("maps the chat button to clipboard-and-file with a renderer-safe preview URL", async () => {
-    const harness = createHarness();
-    vi.mocked(harness.client.start).mockResolvedValueOnce(
-      result({
-        requestId: "request-2",
+    // `startFromChatButton` builds the preview URL from `process.platform`
+    // (the helper only ever produces paths matching the host it was spawned
+    // on) — pin it to win32 for this Windows-style-path assertion so the
+    // test is deterministic regardless of which OS actually runs it.
+    const originalPlatform = process.platform;
+    Object.defineProperty(process, "platform", { value: "win32" });
+    try {
+      const harness = createHarness();
+      vi.mocked(harness.client.start).mockResolvedValueOnce(
+        result({
+          requestId: "request-2",
+          filePath: "C:\\shots\\valid.png",
+          hasAnnotations: true,
+        }),
+      );
+
+      await expect(harness.service.startFromChatButton()).resolves.toEqual({ ok: true });
+
+      expect(harness.client.start).toHaveBeenCalledWith("clipboard-and-file", "chat-button");
+      expect(harness.sendInsert).toHaveBeenCalledWith({
         filePath: "C:\\shots\\valid.png",
+        width: 800,
+        height: 600,
+        mime: "image/png",
+        previewUrl: "file:///C:/shots/valid.png",
         hasAnnotations: true,
-      }),
-    );
-
-    await expect(harness.service.startFromChatButton()).resolves.toEqual({ ok: true });
-
-    expect(harness.client.start).toHaveBeenCalledWith("clipboard-and-file", "chat-button");
-    expect(harness.sendInsert).toHaveBeenCalledWith({
-      filePath: "C:\\shots\\valid.png",
-      width: 800,
-      height: 600,
-      mime: "image/png",
-      previewUrl: "file:///C:/shots/valid.png",
-      hasAnnotations: true,
-    });
+      });
+    } finally {
+      Object.defineProperty(process, "platform", { value: originalPlatform });
+    }
   });
 
   it("can return a button capture to the renderer that requested it", async () => {
@@ -195,7 +205,7 @@ describe("validateScreenshotInsert", () => {
       validateScreenshotInsert(data, "C:\\user-data\\screenshots", () => ({
         isEmpty: () => false,
         getSize: () => ({ width: 800, height: 600 }),
-      })),
+      }), "win32"),
     ).toEqual({
       ...data,
       previewUrl: "file:///C:/user-data/screenshots/capture.png",
@@ -219,6 +229,7 @@ describe("validateScreenshotInsert", () => {
         },
         "C:\\user-data\\screenshots",
         loadImage,
+        "win32",
       ),
     ).toBeNull();
     expect(loadImage).not.toHaveBeenCalled();
@@ -234,6 +245,7 @@ describe("validateScreenshotInsert", () => {
         },
         "C:\\user-data\\screenshots",
         loadImage,
+        "win32",
       ),
     ).toBeNull();
   });
@@ -251,10 +263,58 @@ describe("validateScreenshotInsert", () => {
       validateScreenshotInsert(data, "C:\\user-data\\screenshots", () => ({
         isEmpty: () => false,
         getSize: () => ({ width: 20, height: 10 }),
-      })),
+      }), "win32"),
     ).toEqual({
       ...data,
       previewUrl: "file:///C:/user-data/screenshots/..capture.png",
     });
+  });
+
+  it("accepts a macOS (POSIX) PNG path inside the fixed screenshot directory", () => {
+    const data = {
+      filePath: "/Users/test/Library/Application Support/Cyrene/screenshots/capture.png",
+      width: 800,
+      height: 600,
+      mime: "image/png" as const,
+      hasAnnotations: false,
+    };
+
+    expect(
+      validateScreenshotInsert(
+        data,
+        "/Users/test/Library/Application Support/Cyrene/screenshots",
+        () => ({
+          isEmpty: () => false,
+          getSize: () => ({ width: 800, height: 600 }),
+        }),
+        "darwin",
+      ),
+    ).toEqual({
+      ...data,
+      previewUrl: "file:///Users/test/Library/Application%20Support/Cyrene/screenshots/capture.png",
+    });
+  });
+
+  it("rejects a macOS path outside the screenshot directory", () => {
+    const loadImage = vi.fn(() => ({
+      isEmpty: () => false,
+      getSize: () => ({ width: 800, height: 600 }),
+    }));
+
+    expect(
+      validateScreenshotInsert(
+        {
+          filePath: "/Users/test/Desktop/capture.png",
+          width: 800,
+          height: 600,
+          mime: "image/png",
+          hasAnnotations: false,
+        },
+        "/Users/test/Library/Application Support/Cyrene/screenshots",
+        loadImage,
+        "darwin",
+      ),
+    ).toBeNull();
+    expect(loadImage).not.toHaveBeenCalled();
   });
 });

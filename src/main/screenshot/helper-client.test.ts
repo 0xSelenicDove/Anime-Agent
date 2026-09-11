@@ -120,18 +120,29 @@ describe("ElectronScreenshotHelperClient", () => {
   });
 
   it("keeps a released clipboard-and-file request pending until encoding completes", async () => {
-    const { client, child, startReady } = createHarness();
-    await startReady();
+    // `resolveCompletedFile` (called internally via `completeRequest`) resolves
+    // the Windows-style `screenshotDirectory` fixture using `process.platform`,
+    // which is always the platform the real helper actually ran on in
+    // production — pin it to win32 here so this Windows-path assertion is
+    // deterministic regardless of which OS actually runs the test.
+    const originalPlatform = process.platform;
+    Object.defineProperty(process, "platform", { value: "win32" });
+    try {
+      const { client, child, startReady } = createHarness();
+      await startReady();
 
-    const result = start(client, "clipboard-and-file", "chat-button");
-    child.emitStdout('{"type":"capture-released","requestId":"r1","clipboardWritten":true,"width":800,"height":600}');
+      const result = start(client, "clipboard-and-file", "chat-button");
+      child.emitStdout('{"type":"capture-released","requestId":"r1","clipboardWritten":true,"width":800,"height":600}');
 
-    expect(client.captureState).toBe("idle");
-    expect(client.pendingRequests.get("r1")).toMatchObject({ captureReleased: true, source: "chat-button" });
+      expect(client.captureState).toBe("idle");
+      expect(client.pendingRequests.get("r1")).toMatchObject({ captureReleased: true, source: "chat-button" });
 
-    child.emitStdout('{"type":"completed","requestId":"r1","fileName":"00000000-0000-4000-8000-000000000001.png","width":800,"height":600,"mime":"image/png","clipboardWritten":true,"hasAnnotations":false}');
-    await expect(result).resolves.toMatchObject({ filePath: "C:\\shots\\00000000-0000-4000-8000-000000000001.png" });
-    expect(client.pendingRequests.size).toBe(0);
+      child.emitStdout('{"type":"completed","requestId":"r1","fileName":"00000000-0000-4000-8000-000000000001.png","width":800,"height":600,"mime":"image/png","clipboardWritten":true,"hasAnnotations":false}');
+      await expect(result).resolves.toMatchObject({ filePath: "C:\\shots\\00000000-0000-4000-8000-000000000001.png" });
+      expect(client.pendingRequests.size).toBe(0);
+    } finally {
+      Object.defineProperty(process, "platform", { value: originalPlatform });
+    }
   });
 
   it("does not let a released request's encoding error overwrite a new capture", async () => {
