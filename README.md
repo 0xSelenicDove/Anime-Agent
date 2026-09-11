@@ -83,6 +83,10 @@ CyreneHarness is the core Agent Loop of Cyrene Agent. It chains **model decision
 
 ---
 
+## 📥 Download
+
+Pre-built installers are on the [Releases page](https://github.com/0xSelenicDove/Anime-Agent/releases) — `Cyrene-Setup-<version>.exe` for Windows, `Cyrene-<version>-<arch>.dmg` for macOS (Intel/Apple Silicon). Current releases are marked **pre-release** and the macOS build is unsigned — see the Gatekeeper note below before opening it.
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -133,7 +137,11 @@ Known gaps versus Windows, since these features are implemented against Win32 AP
 - **Music playback (mpv)** — `prepare:mpv` only fetches a Windows `mpv.exe`; a macOS mpv binary isn't wired up yet. `MpvController` falls back to whatever `mpv` it finds on `PATH` (e.g. installed via `brew install mpv`).
 - **Feishu / WeChat iLink / global hotkeys (`nut-js`)** — untested on macOS.
 
-An unnotarized build is unsigned (no Apple Developer ID), so Gatekeeper will warn on first launch; right-click → Open to bypass.
+An unnotarized build is unsigned (no Apple Developer ID). Because macOS marks anything downloaded via a browser with a quarantine flag, Gatekeeper may refuse to open it at all with **"Cyrene is damaged and can't be opened. You should move it to the Trash."** — despite the app being fine. Right-click → Open does not always clear this for a fully unsigned app; if it doesn't, remove the quarantine flag yourself in Terminal:
+
+```bash
+xattr -cr /Applications/Cyrene.app
+```
 
 ### 1. Clone the Project
 

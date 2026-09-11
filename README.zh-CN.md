@@ -84,6 +84,10 @@ CyreneHarness 是 Cyrene Agent 的核心 Agent Loop，负责把**模型决策、
 
 ---
 
+## 📥 下载
+
+预编译安装包发布在 [Releases 页面](https://github.com/0xSelenicDove/Anime-Agent/releases)：Windows 对应 `Cyrene-Setup-<version>.exe`，macOS 对应 `Cyrene-<version>-<arch>.dmg`（Intel/Apple Silicon）。当前版本标记为 **pre-release**，且 macOS 包未签名 —— 打开前请先看下方的 Gatekeeper 说明。
+
 ## 🚀 快速开始
 
 ### 前置条件
@@ -134,7 +138,11 @@ npm run package:mac     # 生成 Intel + Apple Silicon 双架构的 DMG / ZIP �
 - **音乐播放（mpv）** — `prepare:mpv` 目前只下载 Windows 版 `mpv.exe`，尚未接入 macOS 版 mpv 二进制文件；`MpvController` 会退回到 PATH 中查找 `mpv`（例如通过 `brew install mpv` 安装）。
 - **飞书 / 微信 iLink / 全局快捷键（`nut-js`）** — 尚未在 macOS 上测试。
 
-未公证的打包产物首次启动会被 Gatekeeper 拦截，右键点击「打开」即可绕过。
+未公证的打包产物是未签名的（没有 Apple Developer ID）。由于 macOS 会给浏览器下载的文件打上隔离标记，Gatekeeper 有时不会显示常见的「未知开发者」提示，而是直接报错 **「"Cyrene" 已损坏，无法打开。你应该将它移到废纸篓」**——但应用本身并没有损坏。对于完全未签名的应用，右键「打开」不一定能绕过；如果不行，需要在终端里手动移除隔离标记：
+
+```bash
+xattr -cr /Applications/Cyrene.app
+```
 
 ### 1. 克隆项目
 
