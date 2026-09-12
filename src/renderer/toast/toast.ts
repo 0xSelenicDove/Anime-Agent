@@ -13,6 +13,11 @@ import {
 import avatarIconUrl from "./assets/toast-avatar.png";
 import actionSoundUrl from "./assets/toast-action.mp3";
 import notifySoundUrl from "./assets/toast-notify.mp3";
+import { initWindowI18n } from "../shared/window-i18n";
+import zhCN from "./locales/zh-CN.json";
+import en from "./locales/en.json";
+
+const t = initWindowI18n({ "zh-CN": zhCN, en }).t;
 
 const api = window.toast;
 const stack = document.getElementById("toast-stack");
@@ -78,7 +83,7 @@ function buildCard(item: ToastItem): HTMLElement {
   const close = document.createElement("button");
   close.type = "button";
   close.className = "toast-card__close";
-  close.setAttribute("aria-label", "关闭提醒");
+  close.setAttribute("aria-label", t("toast-toast.1"));
   close.innerHTML = CLOSE_ICON;
   close.addEventListener("click", (event) => {
     event.stopPropagation();

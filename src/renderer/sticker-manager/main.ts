@@ -2,6 +2,11 @@ import "../ui/base.css";
 import "./style.css";
 import "../ui/theme";
 import { resolveAsset } from "../../shared/renderer-base";
+import { initWindowI18n } from "../shared/window-i18n";
+import zhCN from "./locales/zh-CN.json";
+import en from "./locales/en.json";
+
+initWindowI18n({ "zh-CN": zhCN, en });
 
 type StickerItem = {
   id: string;

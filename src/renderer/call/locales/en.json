@@ -1,0 +1,20 @@
+{
+  "root.1": "Cyrene · Voice Call",
+  "root.2": "Voice Call",
+  "root.3": "Hang Up",
+  "root.4": "Connecting...",
+  "root.5": "Cyrene",
+  "root.6": "Cyrene",
+  "root.7": "Send This Turn's Audio",
+  "root.8": "Send This Turn's Audio",
+  "root.9": "Hang Up",
+  "call-main.2": " · Voice Call",
+  "call-main.3": "Listening...",
+  "call-main.4": "Connection error — please check your network",
+  "call-main.5": "Call ended",
+  "call-main.6": "Connecting...",
+  "call-main.7": "Can't access the microphone — please check permissions",
+  "call-main.8": "(Sending voice reply)",
+  "call-main.9": "{{name}} is thinking...",
+  "call-main.10": "{{name}} is speaking..."
+}

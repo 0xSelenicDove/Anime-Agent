@@ -2,6 +2,12 @@ import "../ui/base.css";
 import "./tasks.css";
 import "../ui/theme";
 import { getSchedulePanelItems, type ScheduledTask } from "./task-filter";
+import { initWindowI18n } from "../shared/window-i18n";
+import zhCN from "./locales/zh-CN.json";
+import en from "./locales/en.json";
+
+const i18n = initWindowI18n({ "zh-CN": zhCN, en });
+const t = i18n.t;
 
 // ── 类型（后端契约） ──────────────────────────────────────────
 interface TokenDayData {
@@ -36,7 +42,12 @@ if (!window.tasks) {
 }
 
 // ── 常量 ──────────────────────────────────────────────────────
-const WEEKDAYS = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+// 函数而非顶层常量数组：确保语言切换后取到的仍是当前语言（顶层数组只在
+// 模块加载时算一次 t()，语言到达/切换后不会自动刷新）。
+function weekdayLabel(dayIndex: number): string {
+  const keys = ["tasks-tasks.1", "tasks-tasks.2", "tasks-tasks.3", "tasks-tasks.4", "tasks-tasks.5", "tasks-tasks.6", "tasks-tasks.7"];
+  return t(keys[dayIndex] ?? keys[0]);
+}
 const CHART_HEIGHT_PX = 76;          // mini-chart 可用柱高（与 settings 页一致）
 const MIN_BAR_PX = 6;                 // 无数据柱最低高度，避免完全消失
 const TASK_REFRESH_MS = 30_000;       // 任务列表轮询
@@ -76,7 +87,7 @@ function renderDate(): void {
   const now = new Date();
   const el = $("schedule-date");
   if (!el) return;
-  el.innerHTML = `<svg width="14" height="14" viewBox="0 0 48 48" fill="none" aria-hidden="true" style="vertical-align:-2px; margin-right:2px"><path d="M5 19H43V40C43 41.1046 42.1046 42 41 42H7C5.89543 42 5 41.1046 5 40V19Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M5 9C5 7.89543 5.89543 7 7 7H41C42.1046 7 43 7.89543 43 9V19H5V9Z" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M16 4V12" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 4V12" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 34H34" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 34H20" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 26H34" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 26H20" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg> ${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 · ${WEEKDAYS[now.getDay()]}`;
+  el.innerHTML = `<svg width="14" height="14" viewBox="0 0 48 48" fill="none" aria-hidden="true" style="vertical-align:-2px; margin-right:2px"><path d="M5 19H43V40C43 41.1046 42.1046 42 41 42H7C5.89543 42 5 41.1046 5 40V19Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M5 9C5 7.89543 5.89543 7 7 7H41C42.1046 7 43 7.89543 43 9V19H5V9Z" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M16 4V12" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 4V12" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 34H34" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 34H20" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 26H34" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 26H20" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg> ${t("tasks-tasks.9", { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() })} · ${weekdayLabel(now.getDay())}`;
 }
 
 // ── 渲染：今日 Token 用量 + 进度条（拉满+电流感） ────────────
@@ -96,7 +107,7 @@ function renderTodayUsage(data7: TokenDayData[]): void {
     const cacheTotal = hit + (today?.miss ?? 0);
     if (cacheTotal > 0 && (today?.cacheUsageRequests ?? 0) > 0) {
       const rate = Math.round((hit / cacheTotal) * 100);
-      cacheEl.textContent = `缓存命中 ${rate}% · ${formatTokenShort(hit)} tokens`;
+      cacheEl.textContent = t("tasks-tasks.10", { rate, hit: formatTokenShort(hit) });
       cacheEl.hidden = false;
     } else {
       cacheEl.hidden = true;
@@ -130,7 +141,7 @@ function renderWeeklyBars(data7: TokenDayData[]): void {
     const isFuture = i > todayDow;
     weekSlots.push({
       date: key,
-      weekday: WEEKDAYS[day.getDay()],
+      weekday: weekdayLabel(day.getDay()),
       total: data && !isFuture ? (data.input + data.output) : (isFuture ? null : 0),
       isToday,
       isFuture,
@@ -177,10 +188,10 @@ function renderWeeklyBars(data7: TokenDayData[]): void {
   const avg = pastSlots.length ? Math.round(sum / pastSlots.length) : 0;
   if (avgEl) {
     const span = avgEl.querySelector("span");
-    if (span) span.textContent = `日均 ${formatTokenShort(avg)}`;
+    if (span) span.textContent = t("tasks-tasks.11", { avg: formatTokenShort(avg) });
   }
   if (noteEl && peakSlot) {
-    noteEl.innerHTML = `<svg width="18" height="18" viewBox="0 0 48 48" fill="none" aria-hidden="true" style="vertical-align:-2px"><title>Token</title><path d="M4 42H44" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><rect x="8" y="28" width="6" height="14" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><rect x="21" y="18" width="6" height="24" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><rect x="34" y="6" width="6" height="36" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg> 本周 Token 消耗趋势 ｜ 峰值 ${formatTokenShort(peakSlot.total ?? 0)}（${peakSlot.weekday}）`;
+    noteEl.innerHTML = `<svg width="18" height="18" viewBox="0 0 48 48" fill="none" aria-hidden="true" style="vertical-align:-2px"><title>Token</title><path d="M4 42H44" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><rect x="8" y="28" width="6" height="14" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><rect x="21" y="18" width="6" height="24" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><rect x="34" y="6" width="6" height="36" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg> ${t("tasks-tasks.12", { peak: formatTokenShort(peakSlot.total ?? 0), weekday: peakSlot.weekday })}`;
   }
 }
 
@@ -198,7 +209,7 @@ function renderTasks(tasks: ScheduledTask[]): void {
   if (panelItems.items.length === 0) {
     const empty = document.createElement("div");
     empty.className = "task-empty";
-    empty.textContent = "暂无已启用定时任务";
+    empty.textContent = t("tasks-tasks.8");
     listEl.appendChild(empty);
     return;
   }
@@ -288,6 +299,13 @@ function init(): void {
 
   // 任务增删改后立即刷新（不再等 30s 轮询）
   window.tasks?.onSchedulerChanged?.(() => {
+    void refreshAll();
+  });
+
+  // 语言到达/切换后，日期与用量文案（含周几标签）需要立即用新语言重渲染，
+  // 不必等下一次 30s/60s 轮询。
+  i18n.onLanguageApplied(() => {
+    renderDate();
     void refreshAll();
   });
 }

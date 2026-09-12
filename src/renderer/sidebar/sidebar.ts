@@ -2,6 +2,20 @@ import "../ui/base.css";
 import "./sidebar.css";
 import "../ui/theme";
 import { applyActiveCharacterBranding } from "../shared/apply-active-character";
+import { initWindowI18n } from "../shared/window-i18n";
+import zhCN from "./locales/zh-CN.json";
+import en from "./locales/en.json";
+
+const i18n = initWindowI18n({ "zh-CN": zhCN, en });
+const t = i18n.t;
+
+// titleSuffix 是模块加载时算一次的静态字符串，语言切换后不会自动刷新；
+// 改为在 onChange/onLanguageApplied 里手动重算 document.title，两边都能触发。
+let activeCharacterDisplayName = "";
+function refreshWindowTitle(): void {
+  if (activeCharacterDisplayName) document.title = activeCharacterDisplayName + t("sidebar-sidebar.1");
+}
+i18n.onLanguageApplied(refreshWindowTitle);
 
 applyActiveCharacterBranding({
   nameEls: [
@@ -11,7 +25,10 @@ applyActiveCharacterBranding({
   avatarEls: [
     document.querySelector<HTMLImageElement>(".profile__avatar"),
   ],
-  titleSuffix: " · 状态",
+  onChange: (branding) => {
+    activeCharacterDisplayName = branding.displayName;
+    refreshWindowTitle();
+  },
 });
 
 interface ModelConfig {
@@ -113,11 +130,12 @@ const FEELING_ICON: Record<RuntimeFeeling, string> = {
 
 function applyRuntimeDisabled(): void {
 	  statusEmojiEl.innerHTML = '<svg width="22" height="22" viewBox="0 0 48 48" fill="none" aria-hidden="true" style="display:block"><title>通用设置</title><path d="M18.2838 43.1713C14.9327 42.1736 11.9498 40.3213 9.58787 37.867C10.469 36.8227 11 35.4734 11 34.0001C11 30.6864 8.31371 28.0001 5 28.0001C4.79955 28.0001 4.60139 28.01 4.40599 28.0292C4.13979 26.7277 4 25.3803 4 24.0001C4 21.9095 4.32077 19.8938 4.91579 17.9995C4.94381 17.9999 4.97188 18.0001 5 18.0001C8.31371 18.0001 11 15.3138 11 12.0001C11 11.0488 10.7786 10.1493 10.3846 9.35011C12.6975 7.1995 15.5205 5.59002 18.6521 4.72314C19.6444 6.66819 21.6667 8.00013 24 8.00013C26.3333 8.00013 28.3556 6.66819 29.3479 4.72314C32.4795 5.59002 35.3025 7.1995 37.6154 9.35011C37.2214 10.1493 37 11.0488 37 12.0001C37 15.3138 39.6863 18.0001 43 18.0001C43.0281 18.0001 43.0562 17.9999 43.0842 17.9995C43.6792 19.8938 44 21.9095 44 24.0001C44 25.3803 43.8602 26.7277 43.594 28.0292C43.3986 28.01 43.2005 28.0001 43 28.0001C39.6863 28.0001 37 30.6864 37 34.0001C37 35.4734 37.531 36.8227 38.4121 37.867C36.0502 40.3213 33.0673 42.1736 29.7162 43.1713C28.9428 40.752 26.676 39.0001 24 39.0001C21.324 39.0001 19.0572 40.752 18.2838 43.1713Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M24 31C27.866 31 31 27.866 31 24C31 20.134 27.866 17 24 17C20.134 17 17 20.134 17 24C17 27.866 20.134 31 24 31Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg>';
-	  statusLabelEl.textContent = "请到设置里开启";
+	  statusLabelEl.textContent = t("sidebar-sidebar.32");
 	  feelingEmojiEl.innerHTML = '<svg width="22" height="22" viewBox="0 0 48 48" fill="none" aria-hidden="true" style="display:block"><title>通用设置</title><path d="M18.2838 43.1713C14.9327 42.1736 11.9498 40.3213 9.58787 37.867C10.469 36.8227 11 35.4734 11 34.0001C11 30.6864 8.31371 28.0001 5 28.0001C4.79955 28.0001 4.60139 28.01 4.40599 28.0292C4.13979 26.7277 4 25.3803 4 24.0001C4 21.9095 4.32077 19.8938 4.91579 17.9995C4.94381 17.9999 4.97188 18.0001 5 18.0001C8.31371 18.0001 11 15.3138 11 12.0001C11 11.0488 10.7786 10.1493 10.3846 9.35011C12.6975 7.1995 15.5205 5.59002 18.6521 4.72314C19.6444 6.66819 21.6667 8.00013 24 8.00013C26.3333 8.00013 28.3556 6.66819 29.3479 4.72314C32.4795 5.59002 35.3025 7.1995 37.6154 9.35011C37.2214 10.1493 37 11.0488 37 12.0001C37 15.3138 39.6863 18.0001 43 18.0001C43.0281 18.0001 43.0562 17.9999 43.0842 17.9995C43.6792 19.8938 44 21.9095 44 24.0001C44 25.3803 43.8602 26.7277 43.594 28.0292C43.3986 28.01 43.2005 28.0001 43 28.0001C39.6863 28.0001 37 30.6864 37 34.0001C37 35.4734 37.531 36.8227 38.4121 37.867C36.0502 40.3213 33.0673 42.1736 29.7162 43.1713C28.9428 40.752 26.676 39.0001 24 39.0001C21.324 39.0001 19.0572 40.752 18.2838 43.1713Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M24 31C27.866 31 31 27.866 31 24C31 20.134 27.866 17 24 17C20.134 17 17 20.134 17 24C17 27.866 20.134 31 24 31Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg>';
 
-  feelingLabelEl.textContent = "请到设置里开启";
+  feelingLabelEl.textContent = t("sidebar-sidebar.33");
 }
+
 
 function applyRuntimeState(state: RuntimeState | null): void {
   latestRuntimeState = state;
@@ -145,15 +163,23 @@ async function initRuntimeState(): Promise<void> {
   window.runtimeState?.onChanged((state) => applyRuntimeState(state));
 }
 
+let latestModelConfig: ModelConfig | null = null;
+
 function applyModelConfig(config: ModelConfig | null): void {
+  latestModelConfig = config;
   const connected = Boolean(config?.connected);
   const wasRuntimeSyncEnabled = runtimeSyncEnabled;
   runtimeSyncEnabled = config?.runtimeSync === "local" || config?.runtimeSync === "llm";
-  onlineStatusLabel.textContent = connected ? "在线" : "离线";
+  onlineStatusLabel.textContent = connected ? t("sidebar-sidebar.38") : t("sidebar-sidebar.39");
   onlineBadge?.classList.toggle("is-offline", !connected);
   if (!runtimeSyncEnabled) applyRuntimeDisabled();
   else if (!wasRuntimeSyncEnabled) applyRuntimeState(latestRuntimeState);
 }
+
+// applyModelConfig() 可能在初始语言到达前就先跑过一次（初始化早于语言 fetch
+// resolve 时），在线徽标与禁用态文案都不会自然跟着语言变化重渲染；语言到达/
+// 切换后用上次已知的 config 重新套用一次即可。
+i18n.onLanguageApplied(() => applyModelConfig(latestModelConfig));
 
 async function initModelConfig(): Promise<void> {
   try {
@@ -169,8 +195,8 @@ pinBtn.addEventListener("click", async () => {
   const pinned = await window.sidebar?.toggleAlwaysOnTop();
   const isPinned = Boolean(pinned);
   pinBtn.classList.toggle("is-active", isPinned);
-  pinBtn.setAttribute("aria-label", isPinned ? "取消置顶" : "置顶");
-  pinBtn.setAttribute("title", isPinned ? "取消置顶" : "置顶");
+  pinBtn.setAttribute("aria-label", isPinned ? t("sidebar-sidebar.40") : t("sidebar-sidebar.41"));
+  pinBtn.setAttribute("title", isPinned ? t("sidebar-sidebar.42") : t("sidebar-sidebar.43"));
 });
 
 minBtn.addEventListener("click", () => {
