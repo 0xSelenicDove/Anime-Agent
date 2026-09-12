@@ -10,12 +10,12 @@
 
 
 
-**Anime Agent is a Windows Live2D AI desktop companion. It ships with Cyrene from _Honkai: Star Rail_ by default, but the character you talk to is swappable.**
+**Anime Agent is a Live2D desktop AI agent built on CyreneHarness — a real tool-use agent loop with permission-gated execution, checkpointed crash recovery, and layered memory, not a scripted companion chatbot. It ships with Cyrene from _Honkai: Star Rail_ by default, but the character wearing that agent is swappable.**
 
-> A desktop Live2D conversational Agent built with Electron and TypeScript.  
-> Powered by the self-developed Cyrene_Harness & DMAE memory engine,  
-> it brings character-driven conversation, personalized memory, voice interaction, tool use, and multi-platform access into a single desktop Agent,  
-> supporting four conversation modes: Chat, Work, Code, and Learn.
+> Built with Electron and TypeScript, and powered by the self-developed **CyreneHarness** agent loop and **DMAE** memory engine,  
+> Anime Agent chains model decisions, tool execution, and state recovery into a continuous, interruptible, resumable loop —  
+> then wraps that agent in character-driven conversation, personalized memory, voice interaction, and multi-platform access,  
+> across four conversation modes: Chat, Work, Code, and Learn.
 >
 > Through the **Character Pack** system, the name, personality, speech style, avatar, and even the Live2D model can all be swapped as a unit — a generic, IP-free example pack ships built in and can be switched to instantly, and you can build your own pack around any character you like. See the [character pack guide](docs/user-guide/character-packs.md) (Chinese).
 
@@ -26,6 +26,7 @@
 
 ## ✨ At a Glance
 
+- ⚙️ **CyreneHarness Agent Loop** — Not a scripted chatbot: a real tool-use agent loop with permission-gated execution, four-state outcomes (success / failure / unknown / cancelled), crash-recoverable per-round checkpoints, and prefix-cache discipline. See the [CyreneHarness Core Engine](#-cyreneharness-core-engine) section below
 - 🎭 **Character Packs** — Swap the name, personality, avatar, and Live2D model as a unit; a built-in example pack works out of the box, and custom packs can be imported too. See the [guide](docs/user-guide/character-packs.md) (Chinese)
 - 🌸 **Playful Desktop Companion** — A persistent Live2D character with expressions, actions, status, mood, speech bubbles, and intelligent stickers
 - 💬 **Casual Conversation (Chat)** — Focused on character-driven interaction, with responses shaped by conversation history, user style, and long-term memory

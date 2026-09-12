@@ -9,11 +9,11 @@
 </p>
 
 
-**Anime Agent 是一个 Windows Live2D AI 桌面伴侣，默认搭载《崩坏：星穹铁道》昔涟，但陪你聊天的角色本身是可替换的。**
+**Anime Agent 是一个基于 CyreneHarness 构建的 Live2D 桌面 AI Agent —— 一套真正的工具调用 Agent 循环，具备权限门控执行、可断点续跑的崩溃恢复与分层记忆，而不是脚本化的陪伴聊天机器人。默认搭载《崩坏：星穹铁道》昔涟，但驱动这套 Agent 的角色本身是可替换的。**
 
-> 基于 Electron + TypeScript 开发的桌面端 Live2D 智能对话 Agent。  
-> 结合自研 Cyrene_Harness + DMAE 记忆引擎，  
-> 将角色化聊天、个性化记忆、语音交互、工具调用与多平台接入整合在同一个桌面 Agent 中，  
+> 基于 Electron + TypeScript 开发，由自研 **CyreneHarness** Agent 循环与 **DMAE** 记忆引擎驱动，  
+> Anime Agent 将模型决策、工具执行与状态恢复串联成一个持续、可中断、可续跑的循环——  
+> 再把这套 Agent 包裹进角色化聊天、个性化记忆、语音交互与多平台接入之中，  
 > 支持日常聊天（Chat）、辅助工作（Work）、代码协作（Code）、学习陪伴（Learn）四种对话模式。
 >
 > 通过**角色包（Character Pack）**系统，名字、人设、说话方式、头像乃至 Live2D 模型都能整体换成别的角色——内置一个不含任何 IP 背景的示例角色包可以直接切换，也可以自己做一个装进任意喜欢的二次元角色，详见[角色包使用说明](docs/user-guide/character-packs.md)。
@@ -25,6 +25,7 @@
 
 ## ✨ 速览
 
+- ⚙️ **CyreneHarness Agent 循环** — 不是脚本化聊天机器人：真正的工具调用 Agent 循环，权限门控执行、四态结果（成功/失败/未知/取消），可恢复的按轮断点续跑，以及前缀缓存纪律。详见下方 [CyreneHarness 核心引擎](#-cyreneharness-核心引擎) 章节
 - 🎭 **角色包（Character Pack）** — 名字、人设、头像、Live2D 模型整体可换，内置示例角色开箱即用，也支持导入自制角色包，详见[使用说明](docs/user-guide/character-packs.md)
 - 🌸 **趣味桌面陪伴** — Live2D 角色常驻桌面，支持表情、动作、状态、心情、气泡互动与智能表情包
 - 💬 **日常聊天（Chat）** — 专注角色化交流，结合会话历史、用户风格与长期记忆自然回应
