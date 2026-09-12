@@ -376,13 +376,26 @@ function applyStickerSizeSelection(value: "small" | "standard" | "large"): void 
   });
 }
 
-function applyLanguageSelection(language: "zh-CN"): void {
+function applyLanguageSelection(language: string): void {
   languageSelect.querySelectorAll<HTMLButtonElement>(".language-option").forEach((button) => {
     const active = button.dataset.lang === language;
     button.classList.toggle("is-active", active);
     button.setAttribute("aria-pressed", String(active));
   });
 }
+
+languageSelect.querySelectorAll<HTMLButtonElement>(".language-option:not(:disabled)").forEach((button) => {
+  button.addEventListener("click", async () => {
+    const language = button.dataset.lang as "zh-CN" | "en";
+    if (!language) return;
+    applyLanguageSelection(language);
+    try {
+      await window.settings!.saveGeneral({ language, languageIsUserSet: true });
+    } catch {
+      // 保存失败时保留视觉选中态，下次加载会以磁盘上的实际值为准
+    }
+  });
+});
 
 function applyOptionGroupValue(group: HTMLElement, value: string): void {
   group.querySelectorAll<HTMLButtonElement>(".option-block").forEach((button) => {
@@ -1081,7 +1094,7 @@ async function loadGeneralSettings(): Promise<void> {
     void window.settings!.channelsGetStatus()
       .then((status: unknown) => renderProactiveDeliveryAvailability(status as Record<string, { phase?: string }>))
       .catch(() => renderProactiveDeliveryAvailability({}));
-    applyLanguageSelection("zh-CN");
+    applyLanguageSelection(cfg.language ?? "zh-CN");
     setPreferencesSaveStatus("等待保存");
     setAppearanceSaveStatus("等待保存");
     setGeneralSaveStatus("等待保存");
@@ -1475,7 +1488,6 @@ generalForm.addEventListener("submit", async (e) => {
       tasksVisible: tasksVisibleInput.checked,
       toastSoundEnabled: toastSoundEnabledInput.checked,
       launchAtLogin: launchAtLoginInput.checked,
-      language: "zh-CN",
     });
     setGeneralSaveStatus("已保存", "is-ok");
   } catch {

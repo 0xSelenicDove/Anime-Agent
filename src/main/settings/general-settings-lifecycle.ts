@@ -138,6 +138,9 @@ export function handleGeneralSettingsChanged(
       asrLanguage: after.asrLanguage,
     });
   }
+  if (before.language !== after.language) {
+    broadcastToAllWindows(IPC.UI_LOCALE_CHANGED, after.language);
+  }
   if (before.uiTheme !== after.uiTheme) {
     deps.windowManager?.broadcast(IPC.UI_THEME_CHANGED, after.uiTheme);
   }

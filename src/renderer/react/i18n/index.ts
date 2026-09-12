@@ -54,6 +54,18 @@ export function setUiLocale(locale: string): void {
   if (locale.trim()) void i18next.changeLanguage(locale.trim());
 }
 
+/**
+ * 订阅主进程的语言变更广播（用户在设置中切换语言时），实时应用到当前窗口，
+ * 无需重启即可生效。失败（IPC 不可用）时静默跳过。
+ */
+export function subscribeUiLocaleChanges(): void {
+  try {
+    window.chat?.onUiLocaleChanged?.((locale: string) => setUiLocale(locale));
+  } catch {
+    // IPC 不可用时忽略，保持当前语言
+  }
+}
+
 // ── 当前生效角色包展示名 ──────────────────────────────────────────
 // 文案里原先硬编码"昔涟"/"Cyrene"的地方，改用 {{characterName}} 占位符，
 // 由这里统一注入当前生效角色包的展示名——调用方不需要在每处 t() 都手填。

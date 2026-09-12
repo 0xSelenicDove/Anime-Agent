@@ -58,6 +58,10 @@ export interface GeneralSettings extends ChatAppearanceSettings {
   launchAtLogin: boolean;
   /** UI/date/response language. Only "zh-CN" and "en" have translation resources today. */
   language: "zh-CN" | "en";
+  /** Whether `language` was explicitly picked by the user (vs. derived from the OS locale).
+   *  Older builds always persisted "zh-CN" with no real choice behind it, so as long as this
+   *  is false, `language` keeps being re-derived from the system locale on every load. */
+  languageIsUserSet?: boolean;
   uiTheme: UiTheme;
   windowCornerRadius: number;
   /** @deprecated 旧版透明窗口开关，仅保留用于配置兼容。 */

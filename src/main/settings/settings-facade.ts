@@ -49,8 +49,14 @@ function resolveSystemDefaultLanguage(): GeneralSettings["language"] {
   }
 }
 
-function normalizeLanguage(value: unknown): GeneralSettings["language"] {
-  if (typeof value === "string" && (SUPPORTED_LANGUAGES as readonly string[]).includes(value)) {
+/**
+ * Resolves the stored language, only honoring it when the user actually picked it themselves.
+ * Older builds unconditionally persisted "zh-CN" with no real choice behind it, so any settings
+ * file that predates the language picker (isUserSet false/missing) keeps following the system
+ * locale instead of being stuck on that stale value.
+ */
+function normalizeLanguage(value: unknown, isUserSet: boolean): GeneralSettings["language"] {
+  if (isUserSet && typeof value === "string" && (SUPPORTED_LANGUAGES as readonly string[]).includes(value)) {
     return value as GeneralSettings["language"];
   }
   return resolveSystemDefaultLanguage();
@@ -77,6 +83,7 @@ const DEFAULT_GENERAL_SETTINGS: GeneralSettings = {
   toastSoundEnabled: true,
   launchAtLogin: false,
   language: resolveSystemDefaultLanguage(),
+  languageIsUserSet: false,
   uiTheme: "pearl-white",
   windowCornerRadius: DEFAULT_WINDOW_CORNER_RADIUS,
   uiThemeRadius: false,
@@ -257,7 +264,8 @@ export function normalizeGeneralSettings(
       ? DEFAULT_GENERAL_SETTINGS.toastSoundEnabled
       : Boolean(input.toastSoundEnabled),
     launchAtLogin: Boolean(input?.launchAtLogin),
-    language: normalizeLanguage(input?.language),
+    language: normalizeLanguage(input?.language, input?.languageIsUserSet === true),
+    languageIsUserSet: input?.languageIsUserSet === true,
     uiTheme: normalizeUiTheme(input?.uiTheme),
     windowCornerRadius: normalizeWindowCornerRadius(input?.windowCornerRadius),
     uiThemeRadius: input?.uiThemeRadius ?? true,
