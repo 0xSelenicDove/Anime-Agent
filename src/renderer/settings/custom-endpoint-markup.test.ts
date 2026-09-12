@@ -35,10 +35,10 @@ describe("custom endpoint API settings UI", () => {
   });
 
   it("includes the support boundary and all requested FAQ topics", () => {
-    expect(mcpSource).toContain("本地模型与自定义端点不在官方技术支持范围内");
-    expect(mcpSource).toContain("本地模型回复格式异常");
-    expect(mcpSource).toContain("MiniMax 思考模式失效");
-    expect(mcpSource).toContain("Claude 配置项比其他厂商少");
+    expect(mcpSource).toContain('t("mcp-panel.25")');
+    expect(mcpSource).toContain('t("mcp-panel.32")');
+    expect(mcpSource).toContain('t("mcp-panel.34")');
+    expect(mcpSource).toContain('t("mcp-panel.36")');
   });
 
   it("persists profiles through the model catalog instead of perProvider cache", () => {
@@ -60,7 +60,7 @@ describe("custom endpoint API settings UI", () => {
     expect(presetsSource).toContain('anthropicBaseUrl: "https://api.deepseek.com/anthropic"');
     expect(presetsSource).toContain('anthropicBaseUrl: "https://open.bigmodel.cn/api/anthropic"');
     expect(presetsSource).toContain('anthropicBaseUrl: "https://api.xiaomimimo.com/anthropic"');
-    expect(source).toContain("该厂商的 Anthropic 兼容地址未内置");
+    expect(source).toContain('t("ts.120")');
   });
 
   it("top-aligns fields with different amounts of helper text", () => {

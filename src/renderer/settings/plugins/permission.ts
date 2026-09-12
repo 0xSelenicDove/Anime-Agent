@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 // 权限档位 UI：read-only / scoped / per-action / full 四档切换
 // 从 settings.ts 抽离。依赖 plugins DOM 引用 + shared modal。
 // 副作用导入：模块加载时执行事件绑定 + 初始加载档位。
@@ -9,11 +10,11 @@ import { modalState } from "../shared/modal-state";
 type PermissionLevel = "project-read-only" | "read-only" | "scoped" | "per-action" | "full";
 
 const PERMISSION_NOTES: Record<PermissionLevel, string> = {
-  "project-read-only": "完全只读：昔涟只能在当前项目目录内只读，不能修改任何文件，也不能执行命令。",
-  "read-only": "只读：昔涟不会修改本地任何文件，也不能为你安装新工具。",
-  "scoped": "指定目录：昔涟只能在你授权的目录里读写文件（白名单后续在此面板配置）。",
-  "per-action": "每次审批：每次涉及文件或安装的操作，昔涟都会在聊天里弹卡片让你确认。",
-  "full": "完全访问：昔涟可以自由调用本地命令（含 git/npm/pip）。请只在你完全信任的情况下使用。",
+  "project-read-only": t("plugins-permission.1"),
+  "read-only": t("plugins-permission.2"),
+  "scoped": t("plugins-permission.3"),
+  "per-action": t("plugins-permission.4"),
+  "full": t("plugins-permission.5"),
 };
 
 function paintPermissionUI(level: PermissionLevel): void {
@@ -41,23 +42,23 @@ async function confirmFullAccess(): Promise<boolean> {
   const cancelBtn = modalState.cyOverlay.querySelector("#cy-modal-cancel") as HTMLButtonElement;
   const confirmBtn = modalState.cyOverlay.querySelector("#cy-modal-confirm") as HTMLButtonElement;
   iconEl.textContent = "⚠️";
-  titleEl.textContent = "切换到完全访问？";
-  msgEl.textContent = "这意味着昔涟可以在你的电脑上自由执行命令，包括 git clone、npm install、删除文件等。请只在你完全信任她的判断时启用。";
-  cancelBtn.textContent = "再想想";
+  titleEl.textContent = t("plugins-permission.6");
+  msgEl.textContent = t("plugins-permission.7");
+  cancelBtn.textContent = t("plugins-permission.8");
   modalState.cyOverlay.classList.remove("is-hidden");
 
   // 倒计时 5 秒强制等待
   let remain = 5;
   confirmBtn.disabled = true;
-  confirmBtn.textContent = "我了解风险（" + remain + "）";
+  confirmBtn.textContent = t("plugins-permission.9") + remain + "）";
   const tick = setInterval(() => {
     remain -= 1;
     if (remain <= 0) {
       confirmBtn.disabled = false;
-      confirmBtn.textContent = "我了解风险，启用";
+      confirmBtn.textContent = t("plugins-permission.10");
       clearInterval(tick);
     } else {
-      confirmBtn.textContent = "我了解风险（" + remain + "）";
+      confirmBtn.textContent = t("plugins-permission.11") + remain + "）";
     }
   }, 1000);
 

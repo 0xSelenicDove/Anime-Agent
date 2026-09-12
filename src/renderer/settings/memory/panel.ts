@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 // Memory 面板业务逻辑：加载 / 编辑 / 保存 / 渲染
 // 从 settings.ts 抽离。依赖 memory DOM 引用（./dom）、memoryState（./state）、
 // shared 工具（renderInfoList / renderEmptyState / shallowEqual / formatDateTime / escapeHtml）。
@@ -30,11 +31,11 @@ function renderL2List(query = ""): void {
     memoryL2List,
     filtered.map((item) => ({
       title: item.content,
-      body: item.triggerText ? `触发片段：${item.triggerText}` : "无触发片段",
-      meta: `状态：${item.status} · 权重：${item.weight.toFixed(1)} · 创建于：${formatDateTime(item.createdAt)}`,
+      body: item.triggerText ? t("memory-panel.24", { text: item.triggerText }) : t("memory-panel.1"),
+      meta: t("memory-panel.25", { status: item.status, weight: item.weight.toFixed(1), createdAt: formatDateTime(item.createdAt) }),
     })),
-    normalized ? "没有匹配的事件片段" : "暂无事件片段",
-    normalized ? "换个关键词试试" : "聊天后昔涟会自动提炼重要信息",
+    normalized ? t("memory-panel.2") : t("memory-panel.3"),
+    normalized ? t("memory-panel.4") : t("memory-panel.5"),
   );
 }
 
@@ -61,17 +62,17 @@ export async function loadMemoryPanel(): Promise<void> {
     renderInfoList(
       memoryReflectionList,
       payload.reflections,
-      "暂无回顾",
-      "当前项目里回顾还没真正生成落地",
+      t("memory-panel.6"),
+      t("memory-panel.7"),
     );
 
     if (memoryL0EditBtn) memoryL0EditBtn.disabled = false;
     if (memoryL1EditBtn) memoryL1EditBtn.disabled = false;
   } catch (err) {
     console.error("[settings] load memory panel failed", err);
-    renderEmptyState(memoryL2List, "片段读取失败", "请查看终端日志");
-    renderEmptyState(memoryImportedList, "导入知识读取失败", "请查看终端日志");
-    renderEmptyState(memoryReflectionList, "回顾读取失败", "请查看终端日志");
+    renderEmptyState(memoryL2List, t("memory-panel.8"), t("memory-panel.9"));
+    renderEmptyState(memoryImportedList, t("memory-panel.10"), t("memory-panel.11"));
+    renderEmptyState(memoryReflectionList, t("memory-panel.12"), t("memory-panel.13"));
   }
 }
 
@@ -135,12 +136,12 @@ export async function saveL0(): Promise<void> {
     await loadMemoryPanel();
     exitL0EditMode();
     if (memoryL0EditBtn) {
-      memoryL0EditBtn.textContent = "✅ 已保存";
+      memoryL0EditBtn.textContent = t("memory-panel.14");
       setTimeout(() => { if (memoryL0EditBtn && !memoryState.l0Editing) memoryL0EditBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 48 48" fill="none" aria-hidden="true" style="display:inline;vertical-align:-2px"><path d="M5.32497 43.4996L13.81 43.4998L44.9227 12.3871L36.4374 3.90186L5.32471 35.0146L5.32497 43.4996Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M27.9521 12.3872L36.4374 20.8725" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg> 编辑`; }, 2000);
     }
   } catch (err) {
     console.error("[settings] save L0 failed", err);
-    alert("保存失败，请重试");
+    alert(t("memory-panel.15"));
   }
 }
 
@@ -183,12 +184,12 @@ export async function saveL1(): Promise<void> {
     await loadMemoryPanel();
     exitL1EditMode();
     if (memoryL1EditBtn) {
-      memoryL1EditBtn.textContent = "✅ 已保存";
-      setTimeout(() => { if (memoryL1EditBtn && !memoryState.l1Editing) memoryL1EditBtn.textContent = "✏️ 编辑"; }, 2000);
+      memoryL1EditBtn.textContent = t("memory-panel.16");
+      setTimeout(() => { if (memoryL1EditBtn && !memoryState.l1Editing) memoryL1EditBtn.textContent = t("memory-panel.17"); }, 2000);
     }
   } catch (err) {
     console.error("[settings] save L1 failed", err);
-    alert("保存失败，请重试");
+    alert(t("memory-panel.18"));
   }
 }
 
@@ -206,7 +207,7 @@ export function renderImportedDocs(): void {
   if (!memoryImportedList) return;
 
   if (list.length === 0) {
-    renderEmptyState(memoryImportedList, "暂无导入文档", "在聊天窗口上传文件后会自动索引");
+    renderEmptyState(memoryImportedList, t("memory-panel.19"), t("memory-panel.20"));
     return;
   }
 
@@ -214,8 +215,8 @@ export function renderImportedDocs(): void {
     .map((item) => {
       const importId = item.importId || "";
       const fileName = escapeHtml(item.fileName);
-      const chunkInfo = "已索引 " + item.chunkCount + " 个片段";
-      const timeInfo = "最近导入：" + formatDateTime(item.lastImportedAt);
+      const chunkInfo = t("memory-panel.21") + item.chunkCount + t("memory-panel.22");
+      const timeInfo = t("memory-panel.23") + formatDateTime(item.lastImportedAt);
       return [
         '<article class="memory-record memory-record--doc">',
         '  <div class="memory-record__main">',
