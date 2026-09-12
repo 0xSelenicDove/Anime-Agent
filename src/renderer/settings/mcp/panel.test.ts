@@ -48,13 +48,13 @@ describe("MCP Server 管理 UI - 事件绑定", () => {
 describe("MCP Server 管理 UI - 添加流程", () => {
   it("第一步用 showInputModal 收集启动命令", () => {
     expect(mcpSource).toContain('showInputModal');
-    expect(mcpSource).toContain('添加 MCP Server');
-    expect(mcpSource).toContain('输入启动命令');
+    expect(mcpSource).toContain('t("mcp-panel.3")');
+    expect(mcpSource).toContain('t("mcp-panel.4")');
   });
 
   it("第二步用 showInputModal 收集 Server 名称", () => {
-    expect(mcpSource).toContain('MCP Server 名称');
-    expect(mcpSource).toContain('给这个 MCP server 起个名字');
+    expect(mcpSource).toContain('t("mcp-panel.5")');
+    expect(mcpSource).toContain('t("mcp-panel.6")');
   });
 
   it("空命令时提前返回不调用 IPC", () => {
@@ -67,48 +67,48 @@ describe("MCP Server 管理 UI - 添加流程", () => {
   });
 
   it("成功时显示工具数量，失败时显示错误信息", () => {
-    expect(mcpSource).toContain('添加成功');
-    expect(mcpSource).toContain('已连接，发现');
-    expect(mcpSource).toContain('个工具');
-    expect(mcpSource).toContain('添加失败');
+    expect(mcpSource).toContain('t("mcp-panel.11")');
+    expect(mcpSource).toContain('t("mcp-panel.12")');
+    expect(mcpSource).toContain('t("mcp-panel.13")');
+    expect(mcpSource).toContain('t("mcp-panel.9")');
   });
 });
 
 describe("自定义端点接入说明模态框 - 内容完整性", () => {
   it("包含官方云端模型说明段落", () => {
-    expect(mcpSource).toContain("官方云端模型");
-    expect(mcpSource).toContain("OpenAI、Claude、Kimi、DeepSeek、MiniMax、智谱 GLM、通义千问、豆包、小米 MiMo");
+    expect(mcpSource).toContain('t("mcp-panel.19")');
+    expect(mcpSource).toContain('t("mcp-panel.20")');
   });
 
   it("包含自定义端点高级说明段落", () => {
-    expect(mcpSource).toContain("自定义端点");
-    expect(mcpSource).toContain("高级");
-    expect(mcpSource).toContain("OpenAI 或 Anthropic 兼容接口");
+    expect(mcpSource).toContain('t("mcp-panel.22")');
+    expect(mcpSource).toContain('t("mcp-panel.23")');
+    expect(mcpSource).toContain('t("mcp-panel.24")');
   });
 
   it("包含不支持边界警告", () => {
-    expect(mcpSource).toContain("本地模型与自定义端点不在官方技术支持范围内");
-    expect(mcpSource).toContain("系统不会扫描端口、探测模型或自动升级能力档位");
+    expect(mcpSource).toContain('t("mcp-panel.25")');
+    expect(mcpSource).toContain('t("mcp-panel.26")');
   });
 
   it("包含 API Key 安全说明", () => {
-    expect(mcpSource).toContain("你的 API Key 仅存储在本地设备，不会上传至昔涟的服务器");
+    expect(mcpSource).toContain('t("mcp-panel.30")');
   });
 
   it("包含测试连接建议", () => {
-    expect(mcpSource).toContain("测试连接");
-    expect(mcpSource).toContain("连接成功仅表示服务能够响应");
+    expect(mcpSource).toContain('t("mcp-panel.28")');
+    expect(mcpSource).toContain('t("mcp-panel.29")');
   });
 
   it("包含三个 FAQ 折叠项", () => {
-    expect(mcpSource).toContain("本地模型回复格式异常");
-    expect(mcpSource).toContain("MiniMax 思考模式失效");
-    expect(mcpSource).toContain("Claude 配置项比其他厂商少");
+    expect(mcpSource).toContain('t("mcp-panel.32")');
+    expect(mcpSource).toContain('t("mcp-panel.34")');
+    expect(mcpSource).toContain('t("mcp-panel.36")');
   });
 
   it("点击接入说明按钮时调用 showHtmlModal", () => {
     expect(mcpSource).toContain("showHtmlModal");
-    expect(mcpSource).toContain("模型服务接入说明");
+    expect(mcpSource).toContain('t("mcp-panel.38")');
     expect(mcpSource).toContain("CUSTOM_ENDPOINT_GUIDE_BODY");
   });
 });

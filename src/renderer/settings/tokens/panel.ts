@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 // Token 用量面板：指标卡片 + 柱状图 + Chart.js 波浪图
 // 从 settings.ts 抽离。依赖 chart.js + tokensState。
 // 副作用导入：模块加载时执行事件绑定 + 初始渲染。
@@ -50,8 +51,8 @@ interface Window {
 }
 
 function formatCacheMetric(value: number, data: TokenDayData): string {
-  if (data.cacheUsageRequests <= 0) return "暂无数据";
-  const suffix = data.cacheUsageRequests < data.requests ? "（部分请求未提供）" : "";
+  if (data.cacheUsageRequests <= 0) return t("tokens-panel.1");
+  const suffix = data.cacheUsageRequests < data.requests ? t("tokens-panel.2") : "";
   return `${value.toLocaleString()}${suffix}`;
 }
 
@@ -107,7 +108,7 @@ function renderTokenBarChart(data: TokenDayData[]): void {
   const avgEl = document.getElementById("token-avg-label");
   if (avgEl) {
     const avg = Math.round(data.reduce((s, d) => s + d.input + d.output, 0) / data.length);
-    avgEl.textContent = `日均 ${formatTokenShort(avg)}`;
+    avgEl.textContent = t("tokens-panel.24", { avg: formatTokenShort(avg) });
   }
 }
 
@@ -122,12 +123,12 @@ function showTokenTooltip(e: MouseEvent, d: TokenDayData): void {
   if (!tip) return;
   tip.innerHTML = `
     <div class="token-tooltip__date">${d.date} ${d.weekday}</div>
-    <div class="token-tooltip__row"><span>📥 输入</span><span>${d.input.toLocaleString()}</span></div>
-    <div class="token-tooltip__row"><span>📤 输出</span><span>${d.output.toLocaleString()}</span></div>
-    <div class="token-tooltip__row"><span>🎯 缓存命中</span><span>${formatCacheMetric(d.hit, d)}</span></div>
-    <div class="token-tooltip__row"><span>❌ 缓存未命中</span><span>${formatCacheMetric(d.miss, d)}</span></div>
-    <div class="token-tooltip__row"><span>📝 缓存创建</span><span>${d.cacheCreation > 0 ? d.cacheCreation.toLocaleString() : "暂无数据"}</span></div>
-    <div class="token-tooltip__row"><span>🔢 请求</span><span>${d.requests.toLocaleString()} / ${d.attemptedRequests.toLocaleString()}</span></div>
+    <div class="token-tooltip__row"><span>${t("tokens-panel.18")}</span><span>${d.input.toLocaleString()}</span></div>
+    <div class="token-tooltip__row"><span>${t("tokens-panel.19")}</span><span>${d.output.toLocaleString()}</span></div>
+    <div class="token-tooltip__row"><span>${t("tokens-panel.20")}</span><span>${formatCacheMetric(d.hit, d)}</span></div>
+    <div class="token-tooltip__row"><span>${t("tokens-panel.21")}</span><span>${formatCacheMetric(d.miss, d)}</span></div>
+    <div class="token-tooltip__row"><span>${t("tokens-panel.22")}</span><span>${d.cacheCreation > 0 ? d.cacheCreation.toLocaleString() : t("tokens-panel.3")}</span></div>
+    <div class="token-tooltip__row"><span>${t("tokens-panel.23")}</span><span>${d.requests.toLocaleString()} / ${d.attemptedRequests.toLocaleString()}</span></div>
   `;
   tip.hidden = false;
   moveTokenTooltip(e);
@@ -170,7 +171,7 @@ function renderTokenTrendChart(data: TokenDayData[]): void {
       labels,
       datasets: [
         {
-          label: "📥 输入",
+          label: t("tokens-panel.4"),
           data: inputData,
           borderColor: "#3b82f6",
           backgroundColor: "rgba(59, 130, 246, 0.15)",
@@ -182,7 +183,7 @@ function renderTokenTrendChart(data: TokenDayData[]): void {
           pointHoverBackgroundColor: "#3b82f6",
         },
         {
-          label: "📤 输出",
+          label: t("tokens-panel.5"),
           data: outputData,
           borderColor: "#ff8ccc",
           backgroundColor: "rgba(255, 140, 204, 0.15)",
@@ -226,16 +227,16 @@ function renderTokenTrendChart(data: TokenDayData[]): void {
               const d = data[idx];
               const which = item.datasetIndex === 0 ? "input" : "output";
               const val = which === "input" ? d.input : d.output;
-              return `${which === "input" ? "📥 输入" : "📤 输出"}: ${val.toLocaleString()}`;
+              return `${which === "input" ? t("tokens-panel.6") : t("tokens-panel.7")}: ${val.toLocaleString()}`;
             },
             afterBody: (items) => {
               const idx = items[0].dataIndex;
               const d = data[idx];
               return [
-                `🎯 缓存命中: ${formatCacheMetric(d.hit, d)}`,
-                `❌ 缓存未命中: ${formatCacheMetric(d.miss, d)}`,
-                `📝 缓存创建: ${d.cacheCreation > 0 ? d.cacheCreation.toLocaleString() : "暂无数据"}`,
-                `🔢 请求: ${d.requests} / ${d.attemptedRequests}`,
+                `${t("tokens-panel.20")}: ${formatCacheMetric(d.hit, d)}`,
+                `${t("tokens-panel.21")}: ${formatCacheMetric(d.miss, d)}`,
+                `${t("tokens-panel.22")}: ${d.cacheCreation > 0 ? d.cacheCreation.toLocaleString() : t("tokens-panel.8")}`,
+                `${t("tokens-panel.23")}: ${d.requests} / ${d.attemptedRequests}`,
               ];
             },
           },
@@ -274,7 +275,7 @@ function renderModelUsage(models: TokenModelData[]): void {
   const visible = models.slice(0, 6);
   const total = visible.reduce((sum, item) => sum + item.input + item.output, 0);
   if (total <= 0) {
-    list.innerHTML = '<p class="token-models__empty">暂无可归类的模型用量</p>';
+    list.innerHTML = `<p class="token-models__empty">${t("tokens-panel.9")}</p>`;
     return;
   }
   tokensState.modelChart = new Chart(canvas, {
@@ -317,8 +318,8 @@ function updateTokenStats(data: TokenDayData[]): void {
   set("token-input", totalInput.toLocaleString());
   set("token-output", totalOutput.toLocaleString());
   set("token-hit", cacheUsageRequests > 0
-    ? `${totalCacheHit.toLocaleString()}${cacheUsageRequests < requests ? "（部分）" : ""}`
-    : "暂无数据");
+    ? `${totalCacheHit.toLocaleString()}${cacheUsageRequests < requests ? t("tokens-panel.10") : ""}`
+    : t("tokens-panel.11"));
 
   set("token-cache-requests", requests.toLocaleString());
   set("token-cache-total", total.toLocaleString());
@@ -354,11 +355,11 @@ async function refreshTokenPanel(days: number): Promise<void> {
     set("token-requests", "0");
     set("token-input", "0");
     set("token-output", "0");
-    set("token-hit", "暂无数据");
+    set("token-hit", t("tokens-panel.12"));
     set("token-cache-requests", "0");
     set("token-cache-total", "0");
     set("token-cache-hit", "0");
-    set("token-cache-rate", "模型未提供缓存统计");
+    set("token-cache-rate", t("tokens-panel.13"));
     return;
   }
 
@@ -387,10 +388,10 @@ document.querySelectorAll<HTMLButtonElement>(".token-range__btn").forEach((btn) 
 
 document.getElementById("token-usage-clear")?.addEventListener("click", async () => {
   const confirmed = await showModal({
-    title: "重置 Token 统计",
-    message: "这会清空全部本地 Token、请求数和缓存统计，且无法恢复。",
+    title: t("tokens-panel.14"),
+    message: t("tokens-panel.15"),
     icon: "🗑️",
-    confirmText: "全部清空",
+    confirmText: t("tokens-panel.16"),
   });
   if (!confirmed) return;
   const button = document.getElementById("token-usage-clear") as HTMLButtonElement | null;

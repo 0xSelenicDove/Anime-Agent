@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 // Scheduler 面板业务逻辑：列表渲染 / 编辑器 / 任务 CRUD
 // 从 settings.ts 抽离。依赖 scheduler DOM 引用（./dom）、schedulerState（./state）、
 // 纯函数（./utils）、shared showModal、scheduler/types 类型。
@@ -54,7 +55,7 @@ export function renderSchedulerTools(selectedIds: string[] = []): void {
     checkbox.checked = selected.has(tool.id);
     checkbox.addEventListener("change", updateSchedulerConditionalFields);
     const copy = document.createElement("span");
-    copy.textContent = `${tool.name} (${tool.id}) · ${tool.risk}${tool.enabled ? "" : " · 已全局禁用"}`;
+    copy.textContent = `${tool.name} (${tool.id}) · ${tool.risk}${tool.enabled ? "" : t("scheduler-panel.1")}`;
     label.appendChild(checkbox);
     label.appendChild(copy);
     schedulerToolPicker.appendChild(label);
@@ -82,19 +83,19 @@ export async function renderSchedulerList(): Promise<void> {
     const pluginRunning = isPluginTask && schedulerState.pluginRunning[task.ownerPluginId!] === true;
     const badge = card.querySelector(".scheduler-badge") as HTMLSpanElement | null;
     if (badge) {
-      badge.textContent = task.enabled ? "已启用" : "已停用";
+      badge.textContent = task.enabled ? t("scheduler-panel.2") : t("scheduler-panel.3");
       badge.classList.toggle("is-disabled", !task.enabled);
     }
     const meta = card.querySelector(".scheduler-card__meta");
     if (meta) {
       const parts: string[] = [];
-      if (isPluginTask) parts.push(`由插件 ${task.ownerPluginId} 创建`);
+      if (isPluginTask) parts.push(t("scheduler-panel.44", { id: task.ownerPluginId }));
       parts.push(describeSchedule(task.schedule));
-      parts.push(`下次运行：${formatSchedulerDate(task.nextFireAt)}`);
-      parts.push(`模式：${task.mode ?? "work"}`);
+      parts.push(t("scheduler-panel.45", { date: formatSchedulerDate(task.nextFireAt) }));
+      parts.push(t("scheduler-panel.46", { mode: task.mode ?? "work" }));
       // 插件任务固定走工具白名单，不存在"全部已启用工具"的展示分支
-      parts.push(`工具：${isPluginTask ? (task.allowedToolIds.join(", ") || "无") : (task.toolMode === "all-enabled" ? "全部已启用工具" : task.allowedToolIds.join(", ") || "无")}`);
-      if (isPluginTask && !pluginRunning) parts.push("等待插件启用");
+      parts.push(t("scheduler-panel.47", { tools: isPluginTask ? (task.allowedToolIds.join(", ") || t("scheduler-panel.4")) : (task.toolMode === "all-enabled" ? t("scheduler-panel.5") : task.allowedToolIds.join(", ") || t("scheduler-panel.6")) }));
+      if (isPluginTask && !pluginRunning) parts.push(t("scheduler-panel.7"));
       meta.textContent = parts.join(" · ");
     }
     const actions = card.querySelector(".scheduler-card__actions") as HTMLDivElement | null;
@@ -102,30 +103,30 @@ export async function renderSchedulerList(): Promise<void> {
       const fireBtn = document.createElement("button");
       fireBtn.type = "button";
       fireBtn.className = "ghost-btn";
-      fireBtn.textContent = "立即运行";
+      fireBtn.textContent = t("scheduler-panel.8");
       // 插件停用时引擎会跳过其任务，直接禁用按钮避免无效点击
       fireBtn.disabled = isPluginTask && !pluginRunning;
-      if (fireBtn.disabled) fireBtn.title = "插件已停用，等待插件启用";
+      if (fireBtn.disabled) fireBtn.title = t("scheduler-panel.9");
       fireBtn.addEventListener("click", () => void fireSchedulerTask(task.id));
       const editBtn = document.createElement("button");
       editBtn.type = "button";
       editBtn.className = "ghost-btn";
-      editBtn.textContent = "编辑";
+      editBtn.textContent = t("scheduler-panel.10");
       editBtn.addEventListener("click", () => void openSchedulerEditor(task));
       const toggleBtn = document.createElement("button");
       toggleBtn.type = "button";
       toggleBtn.className = "ghost-btn";
-      toggleBtn.textContent = task.enabled ? "停用" : "启用";
+      toggleBtn.textContent = task.enabled ? t("scheduler-panel.11") : t("scheduler-panel.12");
       toggleBtn.addEventListener("click", () => void toggleSchedulerTask(task, !task.enabled));
       const historyBtn = document.createElement("button");
       historyBtn.type = "button";
       historyBtn.className = "ghost-btn";
-      historyBtn.textContent = "历史";
+      historyBtn.textContent = t("scheduler-panel.13");
       historyBtn.addEventListener("click", () => void toggleSchedulerHistory(task.id, card));
       const deleteBtn = document.createElement("button");
       deleteBtn.type = "button";
       deleteBtn.className = "ghost-btn";
-      deleteBtn.textContent = "删除";
+      deleteBtn.textContent = t("scheduler-panel.14");
       deleteBtn.addEventListener("click", () => void deleteSchedulerTask(task.id));
       actions.append(fireBtn, editBtn, toggleBtn, historyBtn, deleteBtn);
     }
@@ -161,7 +162,7 @@ export async function openSchedulerEditor(task?: ScheduledTask): Promise<void> {
     const toolsResult = await window.cyreneScheduler!.getTools();
     if (toolsResult.ok) schedulerState.tools = toolsResult.value ?? [];
   }
-  if (schedulerEditorTitle) schedulerEditorTitle.textContent = task ? "编辑定时任务" : "新建定时任务";
+  if (schedulerEditorTitle) schedulerEditorTitle.textContent = task ? t("scheduler-panel.15") : t("scheduler-panel.16");
   if (schedulerTitleInput) schedulerTitleInput.value = task?.title ?? "";
   if (schedulerPromptInput) schedulerPromptInput.value = task?.prompt ?? "";
   if (schedulerEnabledInput) schedulerEnabledInput.checked = task?.enabled ?? true;
@@ -186,7 +187,7 @@ export async function openSchedulerEditor(task?: ScheduledTask): Promise<void> {
   }
   renderSchedulerTools(task?.allowedToolIds ?? []);
   updateSchedulerConditionalFields();
-  setSchedulerStatus("等待操作");
+  setSchedulerStatus(t("scheduler-panel.17"));
 }
 
 export function closeSchedulerEditor(): void {
@@ -210,29 +211,29 @@ export function collectSchedule(): ScheduleConfig {
   const kind = schedulerKindInput?.value ?? "daily";
   if (kind === "once") {
     const value = schedulerOnceRunAtInput?.value;
-    if (!value) throw new Error("请选择一次性运行时间");
+    if (!value) throw new Error(t("scheduler-panel.18"));
     const runAt = new Date(value);
-    if (Number.isNaN(runAt.getTime())) throw new Error("一次性运行时间无效");
-    if (runAt.getTime() <= Date.now()) throw new Error("一次性任务时间必须晚于当前时间");
+    if (Number.isNaN(runAt.getTime())) throw new Error(t("scheduler-panel.19"));
+    if (runAt.getTime() <= Date.now()) throw new Error(t("scheduler-panel.20"));
     return { kind: "once", runAt: runAt.toISOString() };
   }
   if (kind === "weekly") {
     const timeOfDay = schedulerTimeOfDayInput?.value || "08:00";
-    if (!isValidTimeOfDay(timeOfDay)) throw new Error("每周时间格式必须是 HH:mm");
+    if (!isValidTimeOfDay(timeOfDay)) throw new Error(t("scheduler-panel.21"));
     const dayOfWeek = Number(schedulerDayOfWeekInput?.value ?? 1);
-    if (!Number.isInteger(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) throw new Error("星期必须是周一到周日");
+    if (!Number.isInteger(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) throw new Error(t("scheduler-panel.22"));
     return { kind: "weekly", dayOfWeek: dayOfWeek as 0 | 1 | 2 | 3 | 4 | 5 | 6, timeOfDay };
   }
   if (kind === "interval") {
     const every = Number(schedulerIntervalEveryInput?.value ?? 1);
     const unit = schedulerIntervalUnitInput?.value === "hours" ? "hours" : "minutes";
-    if (!Number.isInteger(every) || every <= 0) throw new Error("间隔必须是正整数");
-    if (unit === "minutes" && every > 1440) throw new Error("分钟间隔不能超过 1440");
-    if (unit === "hours" && every > 168) throw new Error("小时间隔不能超过 168");
+    if (!Number.isInteger(every) || every <= 0) throw new Error(t("scheduler-panel.23"));
+    if (unit === "minutes" && every > 1440) throw new Error(t("scheduler-panel.24"));
+    if (unit === "hours" && every > 168) throw new Error(t("scheduler-panel.25"));
     return { kind: "interval", every, unit };
   }
   const timeOfDay = schedulerTimeOfDayInput?.value || "08:00";
-  if (!isValidTimeOfDay(timeOfDay)) throw new Error("每日时间格式必须是 HH:mm");
+  if (!isValidTimeOfDay(timeOfDay)) throw new Error(t("scheduler-panel.26"));
   return { kind: "daily", timeOfDay };
 }
 
@@ -243,11 +244,11 @@ export function collectAllowedToolIds(): string[] {
 
 export async function saveSchedulerTask(): Promise<void> {
   try {
-    setSchedulerStatus("保存中…");
+    setSchedulerStatus(t("scheduler-panel.27"));
     const title = (schedulerTitleInput?.value ?? "").trim();
     const prompt = (schedulerPromptInput?.value ?? "").trim();
-    if (!title) throw new Error("标题不能为空");
-    if (!prompt) throw new Error("提示词不能为空");
+    if (!title) throw new Error(t("scheduler-panel.28"));
+    if (!prompt) throw new Error(t("scheduler-panel.29"));
     const editingTask = schedulerState.tasks.find(t => t.id === schedulerState.editingTaskId);
     const isPluginTask = Boolean(editingTask?.ownerPluginId);
     const input = {
@@ -264,7 +265,7 @@ export async function saveSchedulerTask(): Promise<void> {
     const result = schedulerState.editingTaskId
       ? await window.cyreneScheduler!.update(schedulerState.editingTaskId, input)
       : await window.cyreneScheduler!.add(input);
-    if (!result.ok) throw new Error(result.error ?? "保存失败");
+    if (!result.ok) throw new Error(result.error ?? t("scheduler-panel.30"));
     await loadSchedulerPanel();
     closeSchedulerEditor();
   } catch (err) {
@@ -278,15 +279,15 @@ export async function saveSchedulerTask(): Promise<void> {
  */
 async function confirmPluginTaskEnable(task: ScheduledTask): Promise<boolean> {
   const promptPreview = task.prompt.length > 120 ? `${task.prompt.slice(0, 120)}…` : task.prompt;
-  const tools = task.allowedToolIds.length ? task.allowedToolIds.join(", ") : "无（仅模型自身能力）";
+  const tools = task.allowedToolIds.length ? task.allowedToolIds.join(", ") : t("scheduler-panel.31");
   const message = [
-    `插件：${task.ownerPluginId}`,
-    `计划：${describeSchedule(task.schedule)}`,
-    `提示词：${promptPreview}`,
-    `会话模式：${task.mode ?? "work"}`,
-    `工具：${tools}`,
+    t("scheduler-panel.48", { id: task.ownerPluginId }),
+    t("scheduler-panel.49", { schedule: describeSchedule(task.schedule) }),
+    t("scheduler-panel.50", { prompt: promptPreview }),
+    t("scheduler-panel.51", { mode: task.mode ?? "work" }),
+    t("scheduler-panel.52", { tools }),
   ].join(" · ");
-  return showModal({ title: "启用插件创建的定时任务", message, confirmText: "确认启用" });
+  return showModal({ title: t("scheduler-panel.32"), message, confirmText: t("scheduler-panel.33") });
 }
 
 export async function toggleSchedulerTask(task: ScheduledTask, enabled: boolean): Promise<void> {
@@ -295,7 +296,7 @@ export async function toggleSchedulerTask(task: ScheduledTask, enabled: boolean)
     if (!confirmed) return;
   }
   const result = await window.cyreneScheduler!.toggle(task.id, enabled);
-  if (!result.ok) window.alert(result.error ?? "切换失败");
+  if (!result.ok) window.alert(result.error ?? t("scheduler-panel.34"));
   await loadSchedulerPanel();
 }
 
@@ -303,19 +304,19 @@ export async function fireSchedulerTask(id: string): Promise<void> {
   const result = await window.cyreneScheduler!.fireNow(id);
   if (!result.ok) {
     const message = result.reason === "task already running"
-      ? "该任务正在运行中"
+      ? t("scheduler-panel.35")
       : result.reason === "plugin not running"
-        ? "插件已停用，等待插件启用后再运行"
-        : (result.error ?? result.reason ?? "立即运行失败");
+        ? t("scheduler-panel.36")
+        : (result.error ?? result.reason ?? t("scheduler-panel.37"));
     window.alert(message);
   }
 }
 
 export async function deleteSchedulerTask(id: string): Promise<void> {
-  const ok = await showModal({ title: "删除定时任务", message: "确定删除这个定时任务吗？", icon: '<svg width="18" height="18" viewBox="0 0 48 48" fill="none" aria-hidden="true" style="vertical-align:-2px"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 15H40L37 44H11L8 15Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M20.002 25.0024V35.0026" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M28.0024 24.9995V34.9972" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M12 14.9999L28.3242 3L36 15" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>', confirmText: "删除" });
+  const ok = await showModal({ title: t("scheduler-panel.38"), message: t("scheduler-panel.39"), icon: '<svg width="18" height="18" viewBox="0 0 48 48" fill="none" aria-hidden="true" style="vertical-align:-2px"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 15H40L37 44H11L8 15Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M20.002 25.0024V35.0026" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M28.0024 24.9995V34.9972" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M12 14.9999L28.3242 3L36 15" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>', confirmText: t("scheduler-panel.40") });
   if (!ok) return;
   const result = await window.cyreneScheduler!.delete(id);
-  if (!result.ok) window.alert(result.error ?? "删除失败");
+  if (!result.ok) window.alert(result.error ?? t("scheduler-panel.41"));
   await loadSchedulerPanel();
 }
 
@@ -330,7 +331,7 @@ export async function toggleSchedulerHistory(taskId: string, card: Element): Pro
   const rows = result.value ?? [];
   box.replaceChildren();
   if (!result.ok || rows.length === 0) {
-    box.textContent = result.ok ? "暂无运行历史" : (result.error ?? "读取历史失败");
+    box.textContent = result.ok ? t("scheduler-panel.42") : (result.error ?? t("scheduler-panel.43"));
   } else {
     for (const row of rows) {
       const div = document.createElement("div");

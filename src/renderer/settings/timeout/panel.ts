@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 // Timeout 面板业务逻辑：超时配置加载 / 保存 / 重置按钮绑定
 // 从 settings.ts 抽离。依赖 timeout DOM 引用（./dom）、api DOM 引用（../api/dom，复用 modelRequestTimeoutSec*）。
 // saveTimeoutSettings 导出供 settings.ts 的 API 表单处理器调用（跨面板共享保存逻辑）。
@@ -20,9 +21,9 @@ export async function loadTimeoutSettings(): Promise<void> {
     modelRequestTimeoutSecInput.value = cfg.modelRequestTimeoutSec != null ? String(cfg.modelRequestTimeoutSec) : "";
     const generalSettings = await window.settings!.getGeneral();
     maxParallelToolCallsInput.value = String(generalSettings.maxParallelToolCalls ?? 4);
-    setRuntimeSaveStatus("时间设置保存后，对后续请求生效。");
+    setRuntimeSaveStatus(t("timeout-panel.1"));
   } catch {
-    setRuntimeSaveStatus("读取偏好失败", "is-error");
+    setRuntimeSaveStatus(t("timeout-panel.2"), "is-error");
   }
 }
 
@@ -31,19 +32,19 @@ export async function saveTimeoutSettings(saveTestTimeout: boolean): Promise<boo
   try {
     if (!saveTestTimeout) {
       settings = {
-        userChoiceTimeout: 1000 * parsePositiveIntOrThrow(timeoutUserChoiceInput.value, "询问等待时间"),
-        modelRequestTimeoutSec: modelRequestTimeoutSecInput.value === "" ? undefined : parsePositiveIntOrThrow(modelRequestTimeoutSecInput.value, "模型请求超时"),
+        userChoiceTimeout: 1000 * parsePositiveIntOrThrow(timeoutUserChoiceInput.value, t("timeout-panel.3")),
+        modelRequestTimeoutSec: modelRequestTimeoutSecInput.value === "" ? undefined : parsePositiveIntOrThrow(modelRequestTimeoutSecInput.value, t("timeout-panel.4")),
       };
     } else {
       settings = {
-        testTimeout: parsePositiveIntOrThrow(timeoutTestInput.value, "测试超时"),
+        testTimeout: parsePositiveIntOrThrow(timeoutTestInput.value, t("timeout-panel.5")),
       };
     }
   } catch (e) {
     if (saveTestTimeout) {
-      setSaveStatus("无效输入：" + e, "is-error");
+      setSaveStatus(t("timeout-panel.6") + e, "is-error");
     } else {
-      setRuntimeSaveStatus("无效输入：" + e, "is-error");
+      setRuntimeSaveStatus(t("timeout-panel.7") + e, "is-error");
     }
     return false;
   }
@@ -56,16 +57,16 @@ export async function saveTimeoutSettings(saveTestTimeout: boolean): Promise<boo
       });
     }
     if (saveTestTimeout) {
-      setSaveStatus("已保存", "is-ok");
+      setSaveStatus(t("timeout-panel.8"), "is-ok");
     } else {
-      setRuntimeSaveStatus("已保存", "is-ok");
+      setRuntimeSaveStatus(t("timeout-panel.9"), "is-ok");
     }
     return true;
   } catch {
     if (saveTestTimeout) {
-      setSaveStatus("保存失败", "is-error");
+      setSaveStatus(t("timeout-panel.10"), "is-error");
     } else {
-      setRuntimeSaveStatus("保存失败", "is-error");
+      setRuntimeSaveStatus(t("timeout-panel.11"), "is-error");
     }
   }
   return false;

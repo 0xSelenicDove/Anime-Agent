@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 // Channels 面板业务逻辑：渠道状态 / 配置加载 / 飞书&微信交互 / 消息日志
 // 从 settings.ts 抽离。依赖 channels DOM 引用（./dom）、channelsState（./state）、
 // general/dom 的 proactiveDeliverySelect + shared 的 normalize/isProactiveDeliveryTargetSelectable。
@@ -48,7 +49,7 @@ function renderChannelStatus(el: HTMLElement | null, phase: string, message?: st
     else if (phase === "config_missing") dot.classList.add("channels-status__dot--config_missing");
     else dot.classList.add("channels-status__dot--offline");
   }
-  if (text) text.textContent = message ?? (phase === "running" ? "运行中" : phase === "starting" ? "启动中" : phase === "config_missing" ? "配置缺失" : phase === "error" ? "错误" : "未启用");
+  if (text) text.textContent = message ?? (phase === "running" ? t("channels-panel.1") : phase === "starting" ? t("channels-panel.2") : phase === "config_missing" ? t("channels-panel.3") : phase === "error" ? t("channels-panel.4") : t("channels-panel.5"));
 }
 
 function setFeishuFeedback(kind: "info" | "ok" | "err", msg: string): void {
@@ -83,13 +84,13 @@ function parseIdList(value: string): string[] {
 
 async function copyInputValue(input: HTMLInputElement | null, label: string): Promise<void> {
   const value = input?.value ?? "";
-  if (!value) throw new Error(`${label}为空`);
+  if (!value) throw new Error(t("channels-panel.61", { label }));
   if (navigator.clipboard?.writeText) {
     await navigator.clipboard.writeText(value);
     return;
   }
   input!.select();
-  if (!document.execCommand("copy")) throw new Error(`无法复制${label}`);
+  if (!document.execCommand("copy")) throw new Error(t("channels-panel.62", { label }));
 }
 
 function renderQqDetail(status?: { detail?: Record<string, unknown> }): void {
@@ -113,7 +114,7 @@ function parseOpenidList(value: string): string[] {
 function renderQqBotDetail(status?: { detail?: Record<string, unknown> }): void {
   const rejected = status?.detail?.lastRejectedOpenid;
   if (typeof rejected === "string" && rejected) {
-    setQqBotFeedback("info", `最近一条被白名单拒绝的消息来自 openid：${rejected}（复制到上方白名单可放行）`);
+    setQqBotFeedback("info", t("channels-panel.63", { rejected }));
   }
 }
 
@@ -131,7 +132,7 @@ export interface LogEntry {
 export function renderChannelsLog(entries: LogEntry[]): void {
   if (!channelsLogListEl) return;
   if (entries.length === 0) {
-    channelsLogListEl.innerHTML = '<p class="empty-hint">暂无消息。</p>';
+    channelsLogListEl.innerHTML = `<p class="empty-hint">${t("channels-panel.6")}</p>`;
     return;
   }
   const html = entries
@@ -140,7 +141,7 @@ export function renderChannelsLog(entries: LogEntry[]): void {
       const hh = String(t.getHours()).padStart(2, "0");
       const mm = String(t.getMinutes()).padStart(2, "0");
       const ss = String(t.getSeconds()).padStart(2, "0");
-      const dir = e.dir === "incoming" ? "← 收到" : "→ 回复";
+      const dir = e.dir === "incoming" ? t("channels-panel.7") : t("channels-panel.8");
       const who = e.senderName ? `${e.senderName} (${e.senderId})` : e.senderId;
       const safe = (s: string) =>
         s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -183,10 +184,10 @@ function renderContextBindingOptions(snapshot: ContextBindingSnapshot): void {
   if (channelsContextSourceEl) {
     channelsContextSourceEl.replaceChildren();
     if (snapshot.externalChats.length === 0) {
-      appendOption(channelsContextSourceEl, "", "暂无最近聊天");
+      appendOption(channelsContextSourceEl, "", t("channels-panel.9"));
     } else {
       for (const chat of snapshot.externalChats) {
-        const kind = chat.chatType === "group" ? "群聊" : "私聊";
+        const kind = chat.chatType === "group" ? t("channels-panel.10") : t("channels-panel.11");
         const name = chat.senderName || chat.chatId;
         appendOption(channelsContextSourceEl, chat.sessionId, `${chat.channel} · ${kind} · ${name} (${chat.chatId})`);
       }
@@ -195,10 +196,10 @@ function renderContextBindingOptions(snapshot: ContextBindingSnapshot): void {
   if (channelsContextTargetEl) {
     channelsContextTargetEl.replaceChildren();
     if (snapshot.conversations.length === 0) {
-      appendOption(channelsContextTargetEl, "", "暂无可用对话");
+      appendOption(channelsContextTargetEl, "", t("channels-panel.12"));
     } else {
       for (const conversation of snapshot.conversations) {
-        appendOption(channelsContextTargetEl, conversation.id, `${conversation.title || "新对话"} · ${conversation.mode}`);
+        appendOption(channelsContextTargetEl, conversation.id, `${conversation.title || t("channels-panel.13")} · ${conversation.mode}`);
       }
     }
   }
@@ -210,7 +211,7 @@ function renderContextBindings(snapshot: ContextBindingSnapshot): void {
   if (snapshot.bindings.length === 0) {
     const empty = document.createElement("p");
     empty.className = "empty-hint";
-    empty.textContent = "暂无绑定。";
+    empty.textContent = t("channels-panel.14");
     channelsContextBindingsListEl.append(empty);
     return;
   }
@@ -222,18 +223,18 @@ function renderContextBindings(snapshot: ContextBindingSnapshot): void {
     const row = document.createElement("div");
     row.className = "channels-context-binding";
     const text = document.createElement("span");
-    text.textContent = `${chat?.channel ?? "外部聊天"} · ${chat?.senderName || chat?.chatId || binding.sessionId} → ${conversation?.title || binding.conversationId}`;
+    text.textContent = `${chat?.channel ?? t("channels-panel.15")} · ${chat?.senderName || chat?.chatId || binding.sessionId} → ${conversation?.title || binding.conversationId}`;
     row.append(text);
     const unbind = document.createElement("button");
     unbind.type = "button";
     unbind.className = "btn-secondary";
-    unbind.textContent = "解除";
+    unbind.textContent = t("channels-panel.16");
     unbind.addEventListener("click", async () => {
-      setContextFeedback("info", "解除中...");
+      setContextFeedback("info", t("channels-panel.17"));
       try {
         const result = await window.settings!.channelsContextUnbind(binding.sessionId);
-        if (!result.ok) throw new Error(result.error ?? "解除失败");
-        setContextFeedback("ok", "已解除上下文绑定");
+        if (!result.ok) throw new Error(result.error ?? t("channels-panel.18"));
+        setContextFeedback("ok", t("channels-panel.19"));
         await refreshContextBindings();
       } catch (err) {
         setContextFeedback("err", err instanceof Error ? err.message : String(err));
@@ -278,8 +279,8 @@ export async function loadChannelsPanel(): Promise<void> {
     if (channelsFeishuAppSecretEl) {
       channelsFeishuAppSecretEl.value = "";
       channelsFeishuAppSecretEl.placeholder = cfg.feishu.appSecret
-        ? "已保存（输入新值会覆盖）"
-        : "点击保存配置时加密保存";
+        ? t("channels-panel.20")
+        : t("channels-panel.21");
     }
     if (channelsQqListenModeEl) channelsQqListenModeEl.value = cfg.qq?.listenMode ?? "auto";
     if (channelsQqCustomHostEl) channelsQqCustomHostEl.value = cfg.qq?.customHost ?? "";
@@ -287,8 +288,8 @@ export async function loadChannelsPanel(): Promise<void> {
     if (channelsQqPrivateAllowlistEl) channelsQqPrivateAllowlistEl.value = (cfg.qq?.allowedPrivateUserIds ?? []).join("\n");
     if (channelsQqGroupAllowlistEl) channelsQqGroupAllowlistEl.value = (cfg.qq?.allowedGroupIds ?? []).join("\n");
     if (channelsQqTokenEl) channelsQqTokenEl.placeholder = cfg.qq?.hasAccessToken
-      ? "已保存（输入新值会覆盖）"
-      : "留空仅允许本机 127.0.0.1 监听；WSL/跨网卡请先生成";
+      ? t("channels-panel.22")
+      : t("channels-panel.23");
     // 已保存的 token 不回显；保存时若输入为空且没有已存值，非回环监听需要先补生成
     let hadQqToken = !!cfg.qq?.hasAccessToken;
 
@@ -298,8 +299,8 @@ export async function loadChannelsPanel(): Promise<void> {
     if (channelsQqBotAppSecretEl) {
       channelsQqBotAppSecretEl.value = "";
       channelsQqBotAppSecretEl.placeholder = cfg.qqbot?.hasAppSecret
-        ? "已保存（输入新值会覆盖）"
-        : "点击保存配置时加密保存";
+        ? t("channels-panel.24")
+        : t("channels-panel.25");
     }
     if (channelsQqBotAllowAnyPrivateEl) channelsQqBotAllowAnyPrivateEl.checked = !!cfg.qqbot?.allowAnyPrivate;
     if (channelsQqBotUserAllowlistEl) channelsQqBotUserAllowlistEl.value = (cfg.qqbot?.allowedUserOpenids ?? []).join("\n");
@@ -361,14 +362,14 @@ export async function loadChannelsPanel(): Promise<void> {
     const sessionId = channelsContextSourceEl?.value ?? "";
     const conversationId = channelsContextTargetEl?.value ?? "";
     if (!sessionId || !conversationId) {
-      setContextFeedback("err", "请先选择外部聊天和桌面对话");
+      setContextFeedback("err", t("channels-panel.26"));
       return;
     }
-    setContextFeedback("info", "绑定中...");
+    setContextFeedback("info", t("channels-panel.27"));
     try {
       const result = await window.settings!.channelsContextBind({ sessionId, conversationId });
-      if (!result.ok) throw new Error(result.error ?? "绑定失败");
-      setContextFeedback("ok", "上下文绑定已保存");
+      if (!result.ok) throw new Error(result.error ?? t("channels-panel.28"));
+      setContextFeedback("ok", t("channels-panel.29"));
       await refreshContextBindings();
     } catch (err) {
       setContextFeedback("err", err instanceof Error ? err.message : String(err));
@@ -402,7 +403,7 @@ export async function loadChannelsPanel(): Promise<void> {
 
   // 保存配置（secret 用 safeStorage 加密后落盘 + 触发长连接重连）
   channelsFeishuSaveBtn?.addEventListener("click", async () => {
-    setFeishuFeedback("info", "保存并连接中...");
+    setFeishuFeedback("info", t("channels-panel.30"));
     const patch: Record<string, unknown> = {
       feishu: {
         enabled: channelsFeishuEnabledEl?.checked ?? false,
@@ -417,11 +418,11 @@ export async function loadChannelsPanel(): Promise<void> {
       await window.settings.channelsSaveConfig(patch);
       // 保存后立即触发飞书 adapter 重建 + 重连长连接
       await window.settings.channelsRestart();
-      setFeishuFeedback("ok", "已保存，飞书长连接正在建立…");
+      setFeishuFeedback("ok", t("channels-panel.31"));
       // 清空输入框（已落盘），并把 placeholder 切到"已保存"
       if (channelsFeishuAppSecretEl) {
         channelsFeishuAppSecretEl.value = "";
-        channelsFeishuAppSecretEl.placeholder = "已保存（输入新值会覆盖）";
+        channelsFeishuAppSecretEl.placeholder = t("channels-panel.32");
       }
     } catch (err) {
       setFeishuFeedback("err", err instanceof Error ? err.message : String(err));
@@ -473,28 +474,28 @@ export async function loadChannelsPanel(): Promise<void> {
   window.settings.onChannelsWechatQrcode((dataUrl) => {
     console.log("[WechatSettings] QR event received, dataUrl prefix:", dataUrl?.slice(0, 40), "len:", dataUrl?.length);
     showWechatQr(dataUrl);
-    setWechatFeedback("info", "请用微信扫描二维码");
+    setWechatFeedback("info", t("channels-panel.33"));
   });
   // 订阅 Main 推送的登录结果（成功 / 失败 / 二维码过期）
   window.settings.onChannelsWechatLoginDone((payload) => {
     hideWechatQr();
     if (payload.ok) {
-      setWechatFeedback("ok", `已登录（botId=${payload.botId ?? "?"}）`);
+      setWechatFeedback("ok", t("channels-panel.64", { botId: payload.botId ?? "?" }));
     } else {
-      setWechatFeedback("err", `登录失败：${payload.error ?? "未知错误"}`);
+      setWechatFeedback("err", t("channels-panel.65", { error: payload.error ?? t("channels-panel.34") }));
     }
   });
 
   channelsWechatLoginBtn?.addEventListener("click", async () => {
     hideWechatQr();
-    setWechatFeedback("info", "正在启动扫码…");
+    setWechatFeedback("info", t("channels-panel.35"));
     try {
       const result = await window.settings.channelsWechatLoginStart();
       if (result.ok) {
         // 二维码由 onChannelsWechatQrcode 推过来并显示；这里只刷个轻提示
-        setWechatFeedback("info", "等待二维码推送…");
+        setWechatFeedback("info", t("channels-panel.36"));
       } else {
-        setWechatFeedback("err", result.error ?? "启动失败");
+        setWechatFeedback("err", result.error ?? t("channels-panel.37"));
       }
     } catch (err) {
       setWechatFeedback("err", err instanceof Error ? err.message : String(err));
@@ -503,10 +504,10 @@ export async function loadChannelsPanel(): Promise<void> {
 
   // 重启连接
   channelsWechatRestartBtn?.addEventListener("click", async () => {
-    setWechatFeedback("info", "重启连接中…");
+    setWechatFeedback("info", t("channels-panel.38"));
     try {
       await window.settings.channelsRestart();
-      setWechatFeedback("ok", "已重启");
+      setWechatFeedback("ok", t("channels-panel.39"));
     } catch (err) {
       setWechatFeedback("err", err instanceof Error ? err.message : String(err));
     }
@@ -525,16 +526,16 @@ export async function loadChannelsPanel(): Promise<void> {
     channelsQqTokenEl.value = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
     channelsQqTokenEl.type = "text";
     channelsQqTokenEl.select();
-    setQqFeedback("info", "已生成 Token，请复制到 NapCat WebSocket Client 配置后再保存。");
+    setQqFeedback("info", t("channels-panel.40"));
   });
   channelsQqUrlCopyBtn?.addEventListener("click", () => {
-    void copyInputValue(channelsQqUrlEl, "连接 URL")
-      .then(() => setQqFeedback("ok", "连接 URL 已复制。"))
+    void copyInputValue(channelsQqUrlEl, t("channels-panel.41"))
+      .then(() => setQqFeedback("ok", t("channels-panel.42")))
       .catch((error) => setQqFeedback("err", error instanceof Error ? error.message : String(error)));
   });
   channelsQqTokenCopyBtn?.addEventListener("click", () => {
     void copyInputValue(channelsQqTokenEl, "Token")
-      .then(() => setQqFeedback("ok", "Token 已复制；保存后将无法从设置页读取明文。"))
+      .then(() => setQqFeedback("ok", t("channels-panel.43")))
       .catch((error) => setQqFeedback("err", error instanceof Error ? error.message : String(error)));
   });
   channelsQqSaveBtn?.addEventListener("click", async () => {
@@ -548,10 +549,10 @@ export async function loadChannelsPanel(): Promise<void> {
       channelsQqTokenEl.value = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
       channelsQqTokenEl.type = "text";
       channelsQqTokenEl.select();
-      setQqFeedback("info", "非回环监听需要 Access Token：已自动生成，请先复制到 NapCat WebSocket Client 的 Token 字段，再回来点击保存。");
+      setQqFeedback("info", t("channels-panel.44"));
       return;
     }
-    setQqFeedback("info", "正在保存并启动 QQ 监听…");
+    setQqFeedback("info", t("channels-panel.45"));
     const qq: Record<string, unknown> = {
       enabled: channelsQqEnabledEl?.checked ?? false,
       listenMode,
@@ -570,20 +571,20 @@ export async function loadChannelsPanel(): Promise<void> {
       if (channelsQqTokenEl) {
         channelsQqTokenEl.value = "";
         channelsQqTokenEl.type = "password";
-        channelsQqTokenEl.placeholder = "已保存（输入新值会覆盖）";
+        channelsQqTokenEl.placeholder = t("channels-panel.46");
       }
-      setQqFeedback("ok", "已启动监听；请在 NapCat 中新增 WebSocket Client，并使用上方 URL。");
+      setQqFeedback("ok", t("channels-panel.47"));
     } catch (error) {
       setQqFeedback("err", error instanceof Error ? error.message : String(error));
     }
   });
   channelsQqTestBtn?.addEventListener("click", async () => {
-    setQqFeedback("info", "正在检查 NapCat 连接…");
+    setQqFeedback("info", t("channels-panel.48"));
     try {
       const result = await window.settings.channelsQqTestConnection();
       setQqFeedback(result.ok ? "ok" : "err", result.ok
-        ? `连接正常：${result.detail?.nickname ? `${String(result.detail.nickname)} (` : "QQ "}${String(result.detail?.selfId ?? "")}${result.detail?.nickname ? ")" : ""}${result.detail?.appVersion ? ` · NapCat ${String(result.detail.appVersion)}` : ""} · Stream ${result.detail?.supportsStream ? "可用" : "不可用"}`
-        : result.error ?? "连接失败");
+        ? `${t("channels-panel.67")}${result.detail?.nickname ? `${String(result.detail.nickname)} (` : "QQ "}${String(result.detail?.selfId ?? "")}${result.detail?.nickname ? ")" : ""}${result.detail?.appVersion ? ` · NapCat ${String(result.detail.appVersion)}` : ""} · Stream ${result.detail?.supportsStream ? t("channels-panel.49") : t("channels-panel.50")}`
+        : result.error ?? t("channels-panel.51"));
     } catch (error) {
       setQqFeedback("err", error instanceof Error ? error.message : String(error));
     }
@@ -594,10 +595,10 @@ export async function loadChannelsPanel(): Promise<void> {
   channelsQqBotSaveBtn?.addEventListener("click", async () => {
     const appId = channelsQqBotAppIdEl?.value.trim() ?? "";
     if (!appId) {
-      setQqBotFeedback("err", "请先填写 AppID（q.qq.com → 机器人开发设置里获取）。");
+      setQqBotFeedback("err", t("channels-panel.52"));
       return;
     }
-    setQqBotFeedback("info", "正在保存并连接 QQ 开放平台网关…");
+    setQqBotFeedback("info", t("channels-panel.53"));
     const qqbot: Record<string, unknown> = {
       enabled: channelsQqBotEnabledEl?.checked ?? false,
       appId,
@@ -613,13 +614,13 @@ export async function loadChannelsPanel(): Promise<void> {
       const status = await window.settings.channelsGetStatus() as Record<string, { phase?: string; message?: string }>;
       if (channelsQqBotAppSecretEl) {
         channelsQqBotAppSecretEl.value = "";
-        channelsQqBotAppSecretEl.placeholder = "已保存（输入新值会覆盖）";
+        channelsQqBotAppSecretEl.placeholder = t("channels-panel.54");
       }
       setQqBotFeedback(
         status.qqbot?.phase === "running" ? "ok" : "info",
         status.qqbot?.phase === "running"
-          ? "网关已连接，机器人已上线。"
-          : `已保存（当前状态：${status.qqbot?.message ?? status.qqbot?.phase ?? "未知"}）`,
+          ? t("channels-panel.55")
+          : t("channels-panel.66", { status: status.qqbot?.message ?? status.qqbot?.phase ?? t("channels-panel.56") }),
       );
     } catch (error) {
       setQqBotFeedback("err", error instanceof Error ? error.message : String(error));
@@ -627,12 +628,12 @@ export async function loadChannelsPanel(): Promise<void> {
   });
 
   channelsQqBotTestBtn?.addEventListener("click", async () => {
-    setQqBotFeedback("info", "正在校验 AppID / AppSecret…");
+    setQqBotFeedback("info", t("channels-panel.57"));
     try {
       const result = await window.settings.channelsQqBotTestConnection();
       setQqBotFeedback(result.ok ? "ok" : "err", result.ok
-        ? "凭证有效，可以正常连接 QQ 开放平台。"
-        : result.error ?? "连接失败");
+        ? t("channels-panel.58")
+        : result.error ?? t("channels-panel.59"));
     } catch (error) {
       setQqBotFeedback("err", error instanceof Error ? error.message : String(error));
     }
@@ -641,7 +642,7 @@ export async function loadChannelsPanel(): Promise<void> {
   // ===== 消息日志事件绑定 =====
   channelsLogRefreshBtn?.addEventListener("click", () => void refreshChannelsLog());
   channelsLogClearBtn?.addEventListener("click", async () => {
-    if (!confirm("确认清空所有 bot 消息日志？")) return;
+    if (!confirm(t("channels-panel.60"))) return;
     await window.settings.channelsLogClear();
     await refreshChannelsLog();
   });

@@ -351,14 +351,14 @@ closeBtn.addEventListener("click", () => window.settings?.close());
 
 
 
-async function saveAppearancePatch(patch: Partial<GeneralSettings>, successText = "已自动应用"): Promise<void> {
+async function saveAppearancePatch(patch: Partial<GeneralSettings>, successText = t("ts.1")): Promise<void> {
   try {
-    setAppearanceSaveStatus("应用中…");
+    setAppearanceSaveStatus(t("ts.2"));
     await window.settings!.saveGeneral(patch);
     setAppearanceSaveStatus(successText, "is-ok");
   } catch (error) {
     console.error("自动应用外观设置失败:", error);
-    setAppearanceSaveStatus("自动应用失败", "is-error");
+    setAppearanceSaveStatus(t("ts.3"), "is-error");
   }
 }
 
@@ -505,26 +505,26 @@ function ensureCustomStyleModal(): HTMLElement {
   preferencesState.customStyleOverlay.className = "cy-modal-overlay is-hidden custom-style-overlay";
   preferencesState.customStyleOverlay.innerHTML = [
     '<div class="cy-modal custom-style-modal" role="dialog" aria-modal="true">',
-    '  <div class="cy-modal__head"><span class="cy-modal__icon">🖊️</span><h3 class="cy-modal__title">自定义风格采样</h3></div>',
+    `  <div class="cy-modal__head"><span class="cy-modal__icon">🖊️</span><h3 class="cy-modal__title">${t("ts.4")}</h3></div>`,
     '  <hr class="cy-modal__divider">',
     '  <div class="custom-style-modal__section">',
-    '    <div class="custom-style-modal__label">多样性控制</div>',
-    '    <label><input type="radio" name="custom-diversity" value="model-default"> 跟随模型</label>',
+    `    <div class="custom-style-modal__label">${t("ts.5")}</div>`,
+    `    <label><input type="radio" name="custom-diversity" value="model-default">${t("ts.6")}</label>`,
     '    <label><input type="radio" name="custom-diversity" value="temperature"> Temperature</label>',
     '    <label><input type="radio" name="custom-diversity" value="top-p"> Top-P</label>',
     '    <div class="custom-style-modal__value" id="custom-diversity-row"><span id="custom-diversity-label">Temperature</span><input id="custom-diversity-value" type="number" min="0" max="2" step="0.01"></div>',
     '  </div>',
     '  <div class="custom-style-modal__section">',
-    '    <div class="custom-style-modal__label">重复控制</div>',
-    '    <label><input type="radio" name="custom-repetition" value="model-default"> 跟随模型</label>',
-    '    <label><input type="radio" name="custom-repetition" value="light"> 轻度抑制</label>',
-    '    <label><input type="radio" name="custom-repetition" value="medium"> 中度抑制</label>',
-    '    <label><input type="radio" name="custom-repetition" value="strong"> 重度抑制</label>',
+    `    <div class="custom-style-modal__label">${t("ts.7")}</div>`,
+    `    <label><input type="radio" name="custom-repetition" value="model-default">${t("ts.8")}</label>`,
+    `    <label><input type="radio" name="custom-repetition" value="light">${t("ts.9")}</label>`,
+    `    <label><input type="radio" name="custom-repetition" value="medium">${t("ts.10")}</label>`,
+    `    <label><input type="radio" name="custom-repetition" value="strong">${t("ts.11")}</label>`,
     '  </div>',
     '  <div class="cy-modal__actions">',
-    '    <button type="button" class="ghost-btn" id="custom-style-reset">恢复默认</button>',
-    '    <button type="button" class="ghost-btn" id="custom-style-cancel">取消</button>',
-    '    <button type="button" class="btn-primary" id="custom-style-save">保存</button>',
+    `    <button type="button" class="ghost-btn" id="custom-style-reset">${t("ts.12")}</button>`,
+    `    <button type="button" class="ghost-btn" id="custom-style-cancel">${t("ts.13")}</button>`,
+    `    <button type="button" class="btn-primary" id="custom-style-save">${t("ts.14")}</button>`,
     '  </div>',
     '</div>',
   ].join("\n");
@@ -557,9 +557,9 @@ function ensureCustomStyleModal(): HTMLElement {
       preferencesState.currentCustomStyleConfig = buildCustomStyleConfigFromModal();
       await window.settings!.saveGeneral({ customStyle: preferencesState.currentCustomStyleConfig });
       preferencesState.customStyleOverlay?.classList.add("is-hidden");
-      setPreferencesSaveStatus("自定义风格已保存", "is-ok");
+      setPreferencesSaveStatus(t("ts.15"), "is-ok");
     } catch {
-      setPreferencesSaveStatus("自定义风格保存失败", "is-error");
+      setPreferencesSaveStatus(t("ts.16"), "is-error");
     }
   });
   return preferencesState.customStyleOverlay;
@@ -605,7 +605,7 @@ function renderMomentsSubRowsVisibility(): void {
 
 
 function renderUiFont(font: UiFont): void {
-  uiFontCurrent.textContent = font.kind === "custom" ? font.displayName : "思源黑体（默认）";
+  uiFontCurrent.textContent = font.kind === "custom" ? font.displayName : t("ts.17");
   uiFontResetButton.hidden = font.kind !== "custom";
 }
 
@@ -652,7 +652,7 @@ function fillPresetOptions(): void {
     const label = document.createElement("span");
     label.className = "preset-card__name";
     label.textContent = preset.shortName;
-    if (preset.disabled) label.textContent += "（暂未适配）";
+    if (preset.disabled) label.textContent += t("ts.18");
     card.appendChild(label);
 
     presetCards.appendChild(card);
@@ -718,12 +718,12 @@ function renderProfileList(): void {
   if (!profileList) return;
   profileList.replaceChildren();
   const count = apiState.profiles.length;
-  profileListCount.textContent = count ? `${count} 个档案` : "";
+  profileListCount.textContent = count ? t("ts.169", { count }) : "";
 
   if (count === 0) {
     const empty = document.createElement("div");
     empty.className = "profile-list__empty";
-    empty.textContent = "还没有档案。选下方厂商预设新建一个，保存后会出现在这里。";
+    empty.textContent = t("ts.19");
     profileList.appendChild(empty);
     return;
   }
@@ -752,13 +752,13 @@ function renderProfileList(): void {
     if (isDefault) {
       const badge = document.createElement("span");
       badge.className = "profile-card__badge";
-      badge.textContent = "默认";
+      badge.textContent = t("ts.20");
       badges.appendChild(badge);
     }
     if (profile.multimodal === true) {
       const badge = document.createElement("span");
       badge.className = "profile-card__badge profile-card__badge--vision";
-      badge.textContent = "多模态";
+      badge.textContent = t("ts.21");
       badges.appendChild(badge);
     }
     card.appendChild(badges);
@@ -778,7 +778,7 @@ async function reloadProfiles(): Promise<void> {
 
 /** 编辑状态 UI：标题 + 删除按钮可见性。 */
 function applyEditingStateUI(): void {
-  profileEditorTitle.textContent = apiState.editingProfileId ? "编辑档案" : "新建档案";
+  profileEditorTitle.textContent = apiState.editingProfileId ? t("ts.22") : t("ts.23");
   deleteProfileBtn.hidden = !apiState.editingProfileId;
 }
 
@@ -802,7 +802,7 @@ function editProfile(profile: SavedProfileLite, globalMultimodal: boolean): void
   applyMultimodalUI();
   applyEditingStateUI();
   renderProfileList();
-  setSaveStatus(`正在编辑「${profile.displayName || profile.model}」`);
+  setSaveStatus(t("ts.170", { name: profile.displayName || profile.model }));
 }
 
 /** 开始新建草稿：preset 预填 URL/模型/协议，清空 Key 与昵称。 */
@@ -872,14 +872,14 @@ function updateEndpointPreview(): void {
       : "/chat/completions";
 
   if (!baseUrl) {
-    endpointPreview.textContent = `程序会按所选协议自动追加请求路径（默认 ${defaultSuffix}）。`;
+    endpointPreview.textContent = t("ts.171", { suffix: defaultSuffix });
     return;
   }
 
   const endpoint = resolveApiEndpoint(baseUrl, transport);
   endpointPreview.textContent = endpoint.appendedSuffix
-    ? `程序会自动追加 ${endpoint.appendedSuffix}；最终请求地址：${endpoint.url}`
-    : `已填写完整接口地址，不再追加后缀；最终请求地址：${endpoint.url}`;
+    ? t("ts.172", { suffix: endpoint.appendedSuffix, url: endpoint.url })
+    : t("ts.173", { url: endpoint.url });
 }
 
 function applyCustomEndpointUI(preset: ModelPreset): void {
@@ -890,13 +890,13 @@ function applyCustomEndpointUI(preset: ModelPreset): void {
 
   if (!mode) {
     apiKeyLabel.textContent = "API Key";
-    apiKeyHint.textContent = "填写对应平台创建的 API Key";
+    apiKeyHint.textContent = t("ts.24");
     apiKeyInput.placeholder = "sk-...";
     baseUrlInput.placeholder = "https://api.deepseek.com";
-    modelInput.placeholder = "选厂商后自动填入，可手填覆盖";
-    transportHint.textContent = "请按服务商实际提供的接口类型选择（OpenAI 兼容 / Anthropic 兼容 / OpenAI Responses）；程序不会自动识别协议。";
-    baseUrlResetBtn.title = "重置为厂商默认 URL";
-    apiNoteText.textContent = "选择模型预设后会自动填入 Provider、Base URL 和模型名；你只需要填写对应平台的 API Key。配置只保存在本机 Electron 用户数据目录。";
+    modelInput.placeholder = t("ts.25");
+    transportHint.textContent = t("ts.26");
+    baseUrlResetBtn.title = t("ts.27");
+    apiNoteText.textContent = t("ts.28");
     return;
   }
 
@@ -909,18 +909,18 @@ function applyCustomEndpointUI(preset: ModelPreset): void {
   });
 
   customEndpointSummary.textContent = mode === "local"
-    ? "填写本机模型服务地址并明确选择接口协议；不扫描端口，也不探测模型能力。"
-    : "接入兼容 OpenAI 或 Anthropic 协议的云端服务，能力由服务提供方决定。";
-  apiKeyLabel.textContent = presentation.apiKeyOptional ? "API Key（可选）" : "API Key";
+    ? t("ts.29")
+    : t("ts.30");
+  apiKeyLabel.textContent = presentation.apiKeyOptional ? t("ts.31") : "API Key";
   apiKeyHint.textContent = presentation.apiKeyOptional
-    ? "本地服务无需鉴权时可留空；如网关要求令牌，请在此填写"
-    : "填写自定义服务或第三方代理提供的 API Key";
-  apiKeyInput.placeholder = presentation.apiKeyOptional ? "无需鉴权时留空" : "sk-...";
+    ? t("ts.32")
+    : t("ts.33");
+  apiKeyInput.placeholder = presentation.apiKeyOptional ? t("ts.34") : "sk-...";
   baseUrlInput.placeholder = presentation.baseUrlPlaceholder;
-  modelInput.placeholder = "填写服务实际提供的模型 ID";
-  transportHint.textContent = "请按自定义服务实际提供的接口类型选择；程序不会自动探测。";
-  baseUrlResetBtn.title = "清空自定义 Base URL";
-  apiNoteText.textContent = "自定义端点按保守兼容模式运行。保存后请先测试连接；连接成功不代表结构化输出、工具调用或思考模式一定可用。";
+  modelInput.placeholder = t("ts.35");
+  transportHint.textContent = t("ts.36");
+  baseUrlResetBtn.title = t("ts.37");
+  apiNoteText.textContent = t("ts.38");
 }
 
 export function applyPreset(
@@ -992,7 +992,7 @@ export function applyPreset(
   // 官网链接：有 websiteUrl 就显示并指向，没有就隐藏。
   if (preset.websiteUrl) {
     presetWebsiteLink.href = preset.websiteUrl;
-    presetWebsiteLink.title = `前往 ${preset.shortName} 官网`;
+    presetWebsiteLink.title = t("ts.174", { name: preset.shortName });
     presetWebsiteLink.style.display = "";
   } else {
     presetWebsiteLink.style.display = "none";
@@ -1048,14 +1048,14 @@ async function loadConfig(): Promise<void> {
       applyEditingStateUI();
     }
 
-    setSaveStatus("等待保存");
-    setCyreneSaveStatus("等待保存");
+    setSaveStatus(t("ts.39"));
+    setCyreneSaveStatus(t("ts.40"));
   } catch {
     fillPresetOptions();
     // 默认厂商已从 DeepSeek 改为 MiniMax（v1 vendor adapter 第一家落地的）
-    applyPreset("MiniMax（稀宇科技）");
-    setSaveStatus("读取配置失败", "is-error");
-    setCyreneSaveStatus("读取配置失败", "is-error");
+    applyPreset(t("ts.41"));
+    setSaveStatus(t("ts.42"), "is-error");
+    setCyreneSaveStatus(t("ts.43"), "is-error");
   }
 }
 
@@ -1112,13 +1112,13 @@ async function loadGeneralSettings(): Promise<void> {
       .catch(() => renderProactiveDeliveryAvailability({}));
     applyLanguageSelection(cfg.language ?? "zh-CN");
     applySettingsLanguage(cfg.language);
-    setPreferencesSaveStatus("等待保存");
-    setAppearanceSaveStatus("等待保存");
-    setGeneralSaveStatus("等待保存");
+    setPreferencesSaveStatus(t("ts.44"));
+    setAppearanceSaveStatus(t("ts.45"));
+    setGeneralSaveStatus(t("ts.46"));
   } catch {
-    setPreferencesSaveStatus("读取偏好失败", "is-error");
-    setAppearanceSaveStatus("读取外观失败", "is-error");
-    setGeneralSaveStatus("读取设置失败", "is-error");
+    setPreferencesSaveStatus(t("ts.47"), "is-error");
+    setAppearanceSaveStatus(t("ts.48"), "is-error");
+    setGeneralSaveStatus(t("ts.49"), "is-error");
   }
 }
 
@@ -1139,25 +1139,25 @@ runtimeSyncSelect.querySelectorAll<HTMLButtonElement>(".option-block").forEach((
     const value = button.dataset.value as "off" | "local" | "llm";
     applyRuntimeSyncSelection(value);
     window.settings?.previewRuntimeSync(value);
-    setCyreneSaveStatus("有未保存的更改");
+    setCyreneSaveStatus(t("ts.50"));
   });
 });
 
 stickerEnabledInput.addEventListener("change", () => {
-  setCyreneSaveStatus("有未保存的更改");
+  setCyreneSaveStatus(t("ts.51"));
 });
 
 stickerSizeSelect.querySelectorAll<HTMLButtonElement>(".option-block").forEach((button) => {
   button.addEventListener("click", () => {
     const value = button.dataset.value;
     applyStickerSizeSelection(value === "small" || value === "large" ? value : "standard");
-    setCyreneSaveStatus("有未保存的更改");
+    setCyreneSaveStatus(t("ts.52"));
   });
 });
 
 stickerThresholdInput.addEventListener("input", () => {
   stickerThresholdVal.textContent = parseFloat(stickerThresholdInput.value).toFixed(2);
-  setCyreneSaveStatus("有未保存的更改");
+  setCyreneSaveStatus(t("ts.53"));
 });
 
 openChromeGpu.addEventListener("click", () => {
@@ -1183,7 +1183,7 @@ tasksVisibleInput.addEventListener("change", () => {
 windowCornerRadiusInput.addEventListener("input", () => {
   const radius = applyWindowCornerRadius(windowCornerRadiusInput.value);
   windowCornerRadiusVal.textContent = `${radius}px`;
-  setAppearanceSaveStatus("松开后自动应用");
+  setAppearanceSaveStatus(t("ts.54"));
 });
 
 windowCornerRadiusInput.addEventListener("change", () => {
@@ -1193,7 +1193,7 @@ windowCornerRadiusInput.addEventListener("change", () => {
 
 petAlwaysOnTopInput.addEventListener("change", () => {
   window.settings?.setPetAlwaysOnTop(petAlwaysOnTopInput.checked);
-  setAppearanceSaveStatus("已应用", "is-ok");
+  setAppearanceSaveStatus(t("ts.55"), "is-ok");
 });
 
 uiFontImportButton.addEventListener("click", async () => {
@@ -1201,13 +1201,13 @@ uiFontImportButton.addEventListener("click", async () => {
     const sourcePath = await window.settings?.pickUiFont();
     if (!sourcePath) return;
     uiFontImportButton.disabled = true;
-    setAppearanceSaveStatus("正在导入字体…");
+    setAppearanceSaveStatus(t("ts.56"));
     const font = await window.settings!.importUiFont(sourcePath);
     renderUiFont(font);
-    setAppearanceSaveStatus("字体已应用", "is-ok");
+    setAppearanceSaveStatus(t("ts.57"), "is-ok");
   } catch (error) {
     console.error("导入字体失败:", error);
-    setAppearanceSaveStatus("导入字体失败", "is-error");
+    setAppearanceSaveStatus(t("ts.58"), "is-error");
   } finally {
     uiFontImportButton.disabled = false;
   }
@@ -1218,10 +1218,10 @@ uiFontResetButton.addEventListener("click", async () => {
     uiFontResetButton.disabled = true;
     const font = await window.settings!.resetUiFont();
     renderUiFont(font);
-    setAppearanceSaveStatus("已恢复思源黑体", "is-ok");
+    setAppearanceSaveStatus(t("ts.59"), "is-ok");
   } catch (error) {
     console.error("恢复默认字体失败:", error);
-    setAppearanceSaveStatus("恢复默认字体失败", "is-error");
+    setAppearanceSaveStatus(t("ts.60"), "is-error");
   } finally {
     uiFontResetButton.disabled = false;
   }
@@ -1233,24 +1233,24 @@ uiIconSelect.querySelectorAll<HTMLButtonElement>(".appearance-icon-option").forE
     try {
       await window.settings!.saveGeneral({ uiIcon: icon });
       renderUiIcon(icon);
-      setAppearanceSaveStatus("图标已应用", "is-ok");
+      setAppearanceSaveStatus(t("ts.61"), "is-ok");
     } catch (error) {
       console.error("应用图标失败:", error);
-      setAppearanceSaveStatus("应用图标失败", "is-error");
+      setAppearanceSaveStatus(t("ts.62"), "is-error");
     }
   });
 });
 
 petVisibleInput.addEventListener("change", () => {
   window.settings?.setPetVisible(petVisibleInput.checked);
-  setAppearanceSaveStatus("已应用", "is-ok");
+  setAppearanceSaveStatus(t("ts.63"), "is-ok");
 });
 petZoomInput.addEventListener("input", () => {
   petZoomVal.textContent = Math.round(Number(petZoomInput.value) * 100) + "%";
 });
 petZoomInput.addEventListener("change", () => {
   window.settings?.setPetZoom(Number(petZoomInput.value));
-  setAppearanceSaveStatus("已应用", "is-ok");
+  setAppearanceSaveStatus(t("ts.64"), "is-ok");
 });
 
 // 行间距滑块
@@ -1258,7 +1258,7 @@ chatLineHeightInput.addEventListener("input", () => {
   const val = Number(chatLineHeightInput.value);
   chatLineHeightVal.textContent = val.toFixed(2);
   document.documentElement.style.setProperty("--rb-chat-line-height", String(val));
-  setAppearanceSaveStatus("松开后自动应用");
+  setAppearanceSaveStatus(t("ts.65"));
 });
 chatLineHeightInput.addEventListener("change", () => {
   void saveAppearancePatch({ chatLineHeight: Number(chatLineHeightInput.value) });
@@ -1271,7 +1271,7 @@ chatParaSpacingInput.addEventListener("input", () => {
   const val = Number(chatParaSpacingInput.value);
   chatParaSpacingVal.textContent = val.toFixed(2) + "em";
   document.documentElement.style.setProperty("--rb-chat-para-spacing", val + "em");
-  setAppearanceSaveStatus("松开后自动应用");
+  setAppearanceSaveStatus(t("ts.66"));
 });
 chatParaSpacingInput.addEventListener("change", () => {
   void saveAppearancePatch({ chatParaSpacing: Number(chatParaSpacingInput.value) });
@@ -1280,21 +1280,21 @@ chatParaSpacingInput.addEventListener("change", () => {
 defaultChatModeSelect.querySelectorAll<HTMLButtonElement>(".option-block").forEach((button) => {
   button.addEventListener("click", () => {
     applyDefaultChatModeSelection(normalizeDefaultChatMode(button.dataset.value));
-    setPreferencesSaveStatus("有未保存的更改");
+    setPreferencesSaveStatus(t("ts.67"));
   });
 });
 
 segmentedOutputSelect.querySelectorAll<HTMLButtonElement>(".option-block").forEach((button) => {
   button.addEventListener("click", () => {
     applySegmentedOutputSelection(normalizeSegmentedOutputMode(button.dataset.value));
-    setPreferencesSaveStatus("有未保存的更改");
+    setPreferencesSaveStatus(t("ts.68"));
   });
 });
 
 mobileMessageSegmentationSelect.querySelectorAll<HTMLButtonElement>(".option-block").forEach((button) => {
   button.addEventListener("click", () => {
     applyMobileMessageSegmentationSelection(normalizeMobileMessageSegmentationMode(button.dataset.value));
-    setPreferencesSaveStatus("有未保存的更改");
+    setPreferencesSaveStatus(t("ts.69"));
   });
 });
 
@@ -1302,14 +1302,14 @@ proactiveChatSelect.querySelectorAll<HTMLButtonElement>(".option-block").forEach
   button.addEventListener("click", () => {
     applyProactiveChatSelection(normalizeProactiveChatMode(button.dataset.value));
     renderProactiveDeliveryVisibility();
-    setPreferencesSaveStatus("有未保存的更改");
+    setPreferencesSaveStatus(t("ts.70"));
   });
 });
 
 momentsLivelinessSelect.querySelectorAll<HTMLButtonElement>(".option-block").forEach((button) => {
   button.addEventListener("click", () => {
     applyMomentsLivelinessSelection(button.dataset.value ?? "quiet");
-    setPreferencesSaveStatus("有未保存的更改");
+    setPreferencesSaveStatus(t("ts.71"));
   });
 });
 
@@ -1317,12 +1317,12 @@ proactiveDeliverySelect.querySelectorAll<HTMLButtonElement>(".option-block").for
   button.addEventListener("click", () => {
     if (button.disabled) return;
     applyProactiveDeliverySelection(normalizeProactiveDeliveryTarget(button.dataset.value));
-    setPreferencesSaveStatus("有未保存的更改");
+    setPreferencesSaveStatus(t("ts.72"));
   });
 });
 
 citaEnabledInput.addEventListener("change", () => {
-  setPreferencesSaveStatus("有未保存的更改");
+  setPreferencesSaveStatus(t("ts.73"));
 });
 
 
@@ -1330,39 +1330,39 @@ citaEnabledInput.addEventListener("change", () => {
 // 展示各厂商结构化输出档位与实测兼容性；「详细文档」在 app 内本地渲染完整实测报告。
 // 模型厂商 Work 流程适配（手写 HTML，避免引入 markdown 渲染依赖）
 const WORK_FLOW_COMPAT_MD = `
-<h2>模型兼容性</h2>
-<blockquote>Cyrene 会根据不同厂商自动选择对应的 Structured Output Profile。</blockquote>
+<h2>${t("ts.74")}</h2>
+<blockquote>${t("ts.75")}</blockquote>
 <table>
   <thead>
-    <tr><th>厂商</th><th>支持状态</th><th>档位</th><th>已实测模型</th><th>说明</th></tr>
+    <tr><th>${t("ts.76")}</th><th>${t("ts.77")}</th><th>${t("ts.78")}</th><th>${t("ts.79")}</th><th>${t("ts.80")}</th></tr>
   </thead>
   <tbody>
-    <tr><td>OpenAI</td><td>⚠️ 文档适配</td><td>A</td><td>-</td><td>已完成官方协议适配，等待实测。</td></tr>
-    <tr><td>Claude</td><td>⚠️ 文档适配</td><td>A</td><td>-</td><td>已完成官方协议适配，等待实测。</td></tr>
-    <tr><td>豆包</td><td>✅ 已实测</td><td>A</td><td>Seed 2.1 Turbo / Pro</td><td>推荐使用，完整 Work 流程稳定。</td></tr>
-    <tr><td>Kimi</td><td>✅ 已实测</td><td>A</td><td>K2.6、K2.7 Code</td><td>推荐普通 API，Coding 端点不建议用于 Work。</td></tr>
-    <tr><td>DeepSeek</td><td>✅ 已实测</td><td>B</td><td>V4.1 Flash、V4 Pro</td><td>推荐，速度快、稳定。</td></tr>
-    <tr><td>Qwen</td><td>✅ 已实测</td><td>B</td><td>Qwen3.7 Max</td><td>推荐，表现稳定。</td></tr>
-    <tr><td>GLM</td><td>✅ 已实测</td><td>B</td><td>GLM 5.1、5.2</td><td>推荐，4.7 不建议。</td></tr>
-    <tr><td>MiMo</td><td>✅ 已实测</td><td>B</td><td>MiMo 2.5、2.5 Pro</td><td>推荐，表现稳定。</td></tr>
-    <tr><td>MiniMax</td><td>✅ 已实测</td><td>M</td><td>MiniMax M3</td><td>推荐，需使用 M 档适配。</td></tr>
-    <tr><td>其他模型</td><td>⚠️ 文档适配</td><td>D</td><td>-</td><td>使用通用兼容模式，请自行验证。</td></tr>
+    <tr><td>OpenAI</td><td>${t("ts.81")}</td><td>A</td><td>-</td><td>${t("ts.82")}</td></tr>
+    <tr><td>Claude</td><td>${t("ts.83")}</td><td>A</td><td>-</td><td>${t("ts.84")}</td></tr>
+    <tr><td>${t("ts.85")}</td><td>${t("ts.86")}</td><td>A</td><td>Seed 2.1 Turbo / Pro</td><td>${t("ts.87")}</td></tr>
+    <tr><td>Kimi</td><td>${t("ts.88")}</td><td>A</td><td>K2.6、K2.7 Code</td><td>${t("ts.89")}</td></tr>
+    <tr><td>DeepSeek</td><td>${t("ts.90")}</td><td>B</td><td>V4.1 Flash、V4 Pro</td><td>${t("ts.91")}</td></tr>
+    <tr><td>Qwen</td><td>${t("ts.92")}</td><td>B</td><td>Qwen3.7 Max</td><td>${t("ts.93")}</td></tr>
+    <tr><td>GLM</td><td>${t("ts.94")}</td><td>B</td><td>GLM 5.1、5.2</td><td>${t("ts.95")}</td></tr>
+    <tr><td>MiMo</td><td>${t("ts.96")}</td><td>B</td><td>MiMo 2.5、2.5 Pro</td><td>${t("ts.97")}</td></tr>
+    <tr><td>MiniMax</td><td>${t("ts.98")}</td><td>M</td><td>MiniMax M3</td><td>${t("ts.99")}</td></tr>
+    <tr><td>${t("ts.100")}</td><td>${t("ts.101")}</td><td>D</td><td>-</td><td>${t("ts.102")}</td></tr>
   </tbody>
 </table>
-<h3>档位说明</h3>
+<h3>${t("ts.103")}</h3>
 <ul>
-  <li><strong>A</strong>：原生 JSON Schema / Function Calling</li>
-  <li><strong>B</strong>：JSON Object + 本地校验</li>
-  <li><strong>M</strong>：MiniMax 专用适配</li>
-  <li><strong>D</strong>：通用兼容模式（未知模型 / 自定义端点）</li>
+  <li><strong>A</strong>${t("ts.104")}</li>
+  <li><strong>B</strong>${t("ts.105")}</li>
+  <li><strong>M</strong>${t("ts.106")}</li>
+  <li><strong>D</strong>${t("ts.107")}</li>
 </ul>
 `.trim();
 
 function buildWorkFlowAdaptBody(): string {
   return [
     '<div class="custom-endpoint-guide-warning work-flow-adapt-meta">',
-    "  <strong>模型厂商 Work 流程适配</strong>",
-    '  <span class="work-flow-adapt-date">最新更新于 2026/7/24</span>',
+    `  <strong>${t("ts.108")}</strong>`,
+    `  <span class="work-flow-adapt-date">${t("ts.109")}</span>`,
     "</div>",
     `<div class="work-flow-adapt-table">${WORK_FLOW_COMPAT_MD}</div>`,
   ].join("\n");
@@ -1370,7 +1370,7 @@ function buildWorkFlowAdaptBody(): string {
 
 workFlowAdaptBtn?.addEventListener("click", () => {
   void showHtmlModal({
-    title: "模型厂商 Work 流程适配",
+    title: t("ts.110"),
     icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 10.5V17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7.25" r="1.1" fill="currentColor"/></svg>',
     htmlBody: buildWorkFlowAdaptBody(),
   });
@@ -1389,12 +1389,12 @@ if (testConnectionBtn) {
       return;
     }
     const apiKey = getApiKeyForRequest();
-    if (!baseUrl) { setSaveStatus("请先填写 API URL 再测试", "is-error"); return; }
-    if (!model) { setSaveStatus("请先选择/填写模型再测试", "is-error"); return; }
+    if (!baseUrl) { setSaveStatus(t("ts.111"), "is-error"); return; }
+    if (!model) { setSaveStatus(t("ts.112"), "is-error"); return; }
     if (!await saveTimeoutSettings(true)) {
       return;
     }
-    setSaveStatus("测试连接中…");
+    setSaveStatus(t("ts.113"));
     btn.disabled = true;
     try {
       const result = await window.settings!.testConnection!({
@@ -1405,10 +1405,10 @@ if (testConnectionBtn) {
         explicitTransport: transportSelect.value as ProviderProfile["explicitTransport"],
         reasoning: apiState.editingReasoning,
       });
-      if (result.ok) setSaveStatus("连接成功 " + result.latency + "ms · " + (result.sample ?? ""), "is-ok");
-      else setSaveStatus("连接失败：" + (result.error ?? "未知错误"), "is-error");
+      if (result.ok) setSaveStatus(t("ts.114") + result.latency + "ms · " + (result.sample ?? ""), "is-ok");
+      else setSaveStatus(t("ts.115") + (result.error ?? t("ts.116")), "is-error");
     } catch (e) {
-      setSaveStatus("连接失败：" + (e instanceof Error ? e.message : String(e)), "is-error");
+      setSaveStatus(t("ts.117") + (e instanceof Error ? e.message : String(e)), "is-error");
     } finally {
       btn.disabled = false;
     }
@@ -1419,7 +1419,7 @@ if (testConnectionBtn) {
 // 多模态开关：ON 隐藏视觉配置区，OFF 显示
 multimodalToggle.addEventListener("change", () => {
   applyMultimodalUI();
-  setSaveStatus("有未保存的更改");
+  setSaveStatus(t("ts.118"));
 });
 
 // Base URL 重置按钮：一键复原厂商默认 baseUrl
@@ -1430,7 +1430,7 @@ baseUrlResetBtn.addEventListener("click", () => {
       ? preset.anthropicBaseUrl
       : preset.baseUrl;
     updateEndpointPreview();
-    setSaveStatus("已重置为厂商默认 URL");
+    setSaveStatus(t("ts.119"));
   }
 });
 
@@ -1451,9 +1451,9 @@ transportSelect.addEventListener("change", () => {
   }
   updateEndpointPreview();
   if (transportSelect.value === "anthropic" && !preset.anthropicBaseUrl && preset.transport !== "anthropic") {
-    transportHint.textContent = "该厂商的 Anthropic 兼容地址未内置；请按服务商文档填写 Base URL，程序只追加 /v1/messages。";
+    transportHint.textContent = t("ts.120");
   }
-  setSaveStatus("有未保存的更改");
+  setSaveStatus(t("ts.121"));
 });
 
 // 测试视觉模型按钮（仅在多模态开关 OFF 时可见）
@@ -1462,14 +1462,14 @@ testVisionBtn.addEventListener("click", async () => {
   const baseUrl = synced ? baseUrlInput.value : visionBaseUrlInput.value;
   const apiKey = synced ? apiKeyInput.value : visionApiKeyInput.value;
   const model = synced ? getCurrentModelValue() : visionModelInput.value;
-  if (!baseUrl) { visionTestStatus.textContent = "请先填写 API URL"; return; }
-  if (!model) { visionTestStatus.textContent = "请先填写视觉型号"; return; }
-  visionTestStatus.textContent = "测试中…";
+  if (!baseUrl) { visionTestStatus.textContent = t("ts.122"); return; }
+  if (!model) { visionTestStatus.textContent = t("ts.123"); return; }
+  visionTestStatus.textContent = t("ts.124");
   testVisionBtn.disabled = true;
   try {
     const result = await window.settings!.testVision?.({ baseUrl, apiKey, model });
-    if (result?.ok) visionTestStatus.textContent = "✅ 连接成功 " + result.latency + "ms · " + (result.sample ?? "");
-    else visionTestStatus.textContent = "❌ " + (result?.error ?? "未知错误");
+    if (result?.ok) visionTestStatus.textContent = t("ts.125") + result.latency + "ms · " + (result.sample ?? "");
+    else visionTestStatus.textContent = "❌ " + (result?.error ?? t("ts.126"));
   } catch (e) {
     visionTestStatus.textContent = "❌ " + (e instanceof Error ? e.message : String(e));
   } finally {
@@ -1482,12 +1482,12 @@ testVisionBtn.addEventListener("click", async () => {
 
 apiRuntimeForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  setRuntimeSaveStatus("保存中…");
+  setRuntimeSaveStatus(t("ts.127"));
   try {
     if (!await saveTimeoutSettings(false)) return;
-    setRuntimeSaveStatus("已保存", "is-ok");
+    setRuntimeSaveStatus(t("ts.128"), "is-ok");
   } catch {
-    setRuntimeSaveStatus("保存失败", "is-error");
+    setRuntimeSaveStatus(t("ts.129"), "is-error");
   }
 });
 
@@ -1497,7 +1497,7 @@ appearanceForm.addEventListener("submit", (e) => {
 
 generalForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  setGeneralSaveStatus("保存中…");
+  setGeneralSaveStatus(t("ts.130"));
   try {
     await window.settings!.saveGeneral({
       disableGpuElectron: disableGpuInput.checked,
@@ -1506,15 +1506,15 @@ generalForm.addEventListener("submit", async (e) => {
       toastSoundEnabled: toastSoundEnabledInput.checked,
       launchAtLogin: launchAtLoginInput.checked,
     });
-    setGeneralSaveStatus("已保存", "is-ok");
+    setGeneralSaveStatus(t("ts.131"), "is-ok");
   } catch {
-    setGeneralSaveStatus("保存失败", "is-error");
+    setGeneralSaveStatus(t("ts.132"), "is-error");
   }
 });
 
 cyrenePanel.addEventListener("submit", async (e) => {
   e.preventDefault();
-  setCyreneSaveStatus("保存中…");
+  setCyreneSaveStatus(t("ts.133"));
   try {
     const rawDim = embeddingDimensionsInput?.value?.trim();
     const parsedNum = rawDim ? Number(rawDim) : NaN;
@@ -1528,9 +1528,9 @@ cyrenePanel.addEventListener("submit", async (e) => {
       stickerSimilarityThreshold: parseFloat(stickerThresholdInput.value),
       embeddingDimensions: parsedDim && parsedDim > 0 ? parsedDim : undefined,
     });
-    setCyreneSaveStatus("已保存", "is-ok");
+    setCyreneSaveStatus(t("ts.134"), "is-ok");
   } catch {
-    setCyreneSaveStatus("保存失败", "is-error");
+    setCyreneSaveStatus(t("ts.135"), "is-error");
   }
 });
 
@@ -1541,7 +1541,7 @@ apiForm.addEventListener("submit", async (e) => {
     setSaveStatus(customValidationError, "is-error");
     return;
   }
-  setSaveStatus("保存中…");
+  setSaveStatus(t("ts.136"));
   try {
     if (!await saveTimeoutSettings(true)) {
       return;
@@ -1562,7 +1562,7 @@ apiForm.addEventListener("submit", async (e) => {
       multimodal: multimodalToggle.checked,
     };
     const result = await window.settings!.saveModelProfile?.(profile);
-    if (!result) throw new Error("模型列表不可用");
+    if (!result) throw new Error(t("ts.137"));
     // 全局选项（视觉模型/思考开关/maxToken）不随档案走，单独保存
     await window.settings!.saveConfig({
       vision: {
@@ -1574,9 +1574,9 @@ apiForm.addEventListener("submit", async (e) => {
       disableMaxToken: toggleDisableMaxToken.checked,
     });
     if (isEditing) {
-      setSaveStatus("档案已更新", "is-ok");
+      setSaveStatus(t("ts.138"), "is-ok");
     } else if (result.added) {
-      setSaveStatus("已加入模型列表", "is-ok");
+      setSaveStatus(t("ts.139"), "is-ok");
       // 新建成功后切到编辑态，用户可直接再改再存
       const saved = (result.profiles as SavedProfileLite[]).at(-1);
       if (saved && saved.id) {
@@ -1585,11 +1585,11 @@ apiForm.addEventListener("submit", async (e) => {
         applyEditingStateUI();
       }
     } else {
-      setSaveStatus("相同 Key、模型名与 URL 的档案已存在", "is-error");
+      setSaveStatus(t("ts.140"), "is-error");
     }
     await reloadProfiles();
   } catch {
-    setSaveStatus("保存失败", "is-error");
+    setSaveStatus(t("ts.141"), "is-error");
   }
 });
 
@@ -1686,7 +1686,7 @@ function switchSection(section: string): void {
   ) {
 	    placeholderIcon.innerHTML = label.emoji;
     placeholderTitle.textContent = label.title;
-    placeholderCopy.textContent = "这个模块先占位，等核心聊天与 API 接通后再继续扩展。";
+    placeholderCopy.textContent = t("ts.142");
   }
 
   document.querySelectorAll(".nav-item").forEach((el) => {
@@ -1806,14 +1806,14 @@ memoryImportedList?.addEventListener("click", async (event) => {
   if (!deleteBtn) return;
 
   const importId = deleteBtn.dataset.importId || "";
-  const fileName = deleteBtn.dataset.fileName || "未命名文档";
+  const fileName = deleteBtn.dataset.fileName || t("ts.143");
 
   const confirmed = await showModal({
-    title: "删除导入知识",
-    message: "确定删除导入知识？\n\n文件：\n《" + fileName + "》\n\n删除后不可恢复，如需使用请重新导入。",
+    title: t("ts.144"),
+    message: t("ts.145") + fileName + t("ts.146"),
     icon: "⚠️",
-    confirmText: "删除",
-    cancelText: "取消",
+    confirmText: t("ts.147"),
+    cancelText: t("ts.148"),
   });
 
   if (!confirmed) return;
@@ -1856,7 +1856,7 @@ musicReturnBtn?.addEventListener("click", () => {
 
 // ── 清空聊天历史 ─────────────────────────────────────────────
 clearChatHistoryBtn.addEventListener("click", async () => {
-  if (!window.confirm("清空所有聊天会话？\n此操作会删除全部历史对话，无法恢复。")) return;
+  if (!window.confirm(t("ts.149"))) return;
   const chatStore = (window as typeof window & { chatStore?: ChatStoreApi }).chatStore;
   try {
     const sessions = await chatStore?.list();
@@ -1866,10 +1866,10 @@ clearChatHistoryBtn.addEventListener("click", async () => {
         await chatStore?.delete(s.id);
       }
     }
-    setGeneralSaveStatus("所有聊天会话已清空", "is-ok");
+    setGeneralSaveStatus(t("ts.150"), "is-ok");
   } catch (err) {
     console.warn("[settings] 清空聊天会话失败:", err);
-    setGeneralSaveStatus("清空失败，请查看终端日志", "is-error");
+    setGeneralSaveStatus(t("ts.151"), "is-error");
   }
 });
 
@@ -1884,7 +1884,7 @@ presetCards?.addEventListener("click", (e) => {
     ? getCustomEndpointProvider(apiState.customEndpointMode)
     : cardProviderName;
   startNewDraft(providerName);
-  setSaveStatus("已应用预设，填写 API Key 后保存档案");
+  setSaveStatus(t("ts.152"));
 });
 
 // ── 自定义端点云端/本地模式切换（切换 = 换草稿厂商） ───────────
@@ -1897,8 +1897,8 @@ customEndpointControls?.addEventListener("click", (e) => {
   const providerName = getCustomEndpointProvider(nextMode);
   startNewDraft(providerName);
   setSaveStatus(nextMode === "local"
-    ? "请填写本地服务地址和模型 ID"
-    : "请填写云端服务地址、API Key 和模型 ID");
+    ? t("ts.153")
+    : t("ts.154"));
 });
 
 // ── 档案列表：点击档案载入编辑 ────────────────────────────────
@@ -1915,39 +1915,39 @@ profileList?.addEventListener("click", (e) => {
 deleteProfileBtn?.addEventListener("click", async () => {
   if (!apiState.editingProfileId) return;
   const profile = apiState.profiles.find((p) => p.id === apiState.editingProfileId);
-  const name = profile?.displayName || profile?.model || "该档案";
+  const name = profile?.displayName || profile?.model || t("ts.155");
   try {
     await window.settings?.deleteModelProfile?.(apiState.editingProfileId);
-    setSaveStatus(`已删除「${name}」`, "is-ok");
+    setSaveStatus(t("ts.175", { name }), "is-ok");
     await reloadProfiles();
     // 删除后切到剩余的默认档案；没有档案则回到草稿态
     const next = apiState.profiles.find((p) => p.id === apiState.defaultProfileId) ?? apiState.profiles[0];
     if (next) {
       editProfile(next, multimodalToggle.checked);
     } else {
-      startNewDraft(apiState.activeProvider || "MiniMax（稀宇科技）");
+      startNewDraft(apiState.activeProvider || t("ts.156"));
     }
   } catch {
-    setSaveStatus("删除失败", "is-error");
+    setSaveStatus(t("ts.157"), "is-error");
   }
 });
 
 // ── 偏好设置：聊天社交上下文 / 自定义风格 / 表单提交 ─────────
 chatSocialContextEnabledInput.addEventListener("change", () => {
-  setPreferencesSaveStatus("有未保存的更改");
+  setPreferencesSaveStatus(t("ts.158"));
 });
 momentsEnabledInput.addEventListener("change", () => {
   renderMomentsSubRowsVisibility();
-  setPreferencesSaveStatus("有未保存的更改");
+  setPreferencesSaveStatus(t("ts.159"));
 });
 cyreneMomentsPostingEnabledInput.addEventListener("change", () => {
-  setPreferencesSaveStatus("有未保存的更改");
+  setPreferencesSaveStatus(t("ts.160"));
 });
 cyreneMomentsReactionsEnabledInput.addEventListener("change", () => {
-  setPreferencesSaveStatus("有未保存的更改");
+  setPreferencesSaveStatus(t("ts.161"));
 });
 momentsCharacterReactionsEnabledInput.addEventListener("change", () => {
-  setPreferencesSaveStatus("有未保存的更改");
+  setPreferencesSaveStatus(t("ts.162"));
 });
 
 customStyleSamplingBtn?.addEventListener("click", () => {
@@ -1958,18 +1958,18 @@ customStylePromptBtn?.addEventListener("click", async () => {
   try {
     const result = await window.settings?.openCustomStylePrompt?.();
     if (!result?.ok) {
-      setPreferencesSaveStatus("打开 Prompt 文件失败", "is-error");
+      setPreferencesSaveStatus(t("ts.163"), "is-error");
       return;
     }
-    setPreferencesSaveStatus("已打开 Prompt 文件位置", "is-ok");
+    setPreferencesSaveStatus(t("ts.164"), "is-ok");
   } catch {
-    setPreferencesSaveStatus("打开 Prompt 文件失败", "is-error");
+    setPreferencesSaveStatus(t("ts.165"), "is-error");
   }
 });
 
 preferencesForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  setPreferencesSaveStatus("保存中…");
+  setPreferencesSaveStatus(t("ts.166"));
   try {
     await window.settings!.saveGeneral({
       citaEnabled: citaEnabledInput.checked,
@@ -1987,8 +1987,8 @@ preferencesForm.addEventListener("submit", async (e) => {
       proactiveDeliveryTarget: getProactiveDeliveryValue(),
       screenshotHotkey: screenshotHotkeyInput?.value || "Alt+Shift+S",
     });
-    setPreferencesSaveStatus("已保存", "is-ok");
+    setPreferencesSaveStatus(t("ts.167"), "is-ok");
   } catch {
-    setPreferencesSaveStatus("保存失败", "is-error");
+    setPreferencesSaveStatus(t("ts.168"), "is-error");
   }
 });
