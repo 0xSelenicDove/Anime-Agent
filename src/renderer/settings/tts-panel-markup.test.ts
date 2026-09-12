@@ -12,7 +12,7 @@ function posOf(marker: string): number {
 
 describe("TTS settings 面板结构（自动朗读文本切分）", () => {
   it("开关标题已改名且不再残留「早播」字样", () => {
-    expect(html).toContain("<strong>自动朗读文本切分</strong>");
+    expect(html).toContain('<strong><span data-i18n="tts.652">自动朗读文本切分</span></strong>');
     expect(html).not.toContain("早播文本切分");
   });
 
@@ -24,7 +24,7 @@ describe("TTS settings 面板结构（自动朗读文本切分）", () => {
   it("行文顺序为：自动朗读回复 < 切分开关 < 切分模式 < 语速 < 音量", () => {
     const markers = [
       'id="tts-auto-read"',
-      "<strong>自动朗读文本切分</strong>",
+      '<strong><span data-i18n="tts.652">自动朗读文本切分</span></strong>',
       'id="tts-early-read-split-mode"',
       'id="tts-speed"',
       'id="tts-volume"',
@@ -40,9 +40,9 @@ describe("TTS settings 面板结构（自动朗读文本切分）", () => {
     expect(html).not.toContain('id="tts-early-read-split-mode" role="radiogroup"');
     expect(html).toContain('class="option-blocks option-blocks--wide"');
     expect(html).toContain('data-value="sentence" aria-pressed="true"');
-    expect(html).toContain(">一句一切</button>");
+    expect(html).toContain('>一句一切</span></button>');
     expect(html).toContain('data-value="paragraph" aria-pressed="false"');
-    expect(html).toContain(">一段一切</button>");
+    expect(html).toContain('>一段一切</span></button>');
     expect(html).not.toContain('<select id="tts-early-read-split-mode"');
   });
 });

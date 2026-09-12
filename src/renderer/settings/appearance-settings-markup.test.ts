@@ -14,7 +14,7 @@ describe("appearance settings markup", () => {
 	  it("adds appearance navigation and renames general settings", () => {
 	    expect(html).toContain('data-section="appearance"');
 	    expect(html).toContain('data-section="general"><span><svg class="nav-item__icon"');
-	    expect(html).toContain('通用设置</button>');
+	    expect(html).toContain('通用设置</span></button>');
 	  });
 
 	  it("contains the white-theme appearance groups and disabled future options", () => {
