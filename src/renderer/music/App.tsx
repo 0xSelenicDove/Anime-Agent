@@ -4,6 +4,7 @@ import MusicPlayer from "./components/MusicPlayer";
 import { canOpenPlayer, pickInitialPlaylist, pickPlayStartIndex, LOCAL_CACHE_PLAYLIST_ID } from "./player-source";
 import LoadingScreen from "./components/LoadingScreen";
 import { getNextQueueIndex } from "./playback-queue";
+import { t, useTranslation } from "./i18n";
 import type { PlaybackState as MpvPlaybackState } from "../../shared/music-types";
 import type {
   Playlist,
@@ -131,7 +132,7 @@ function makeCachePlaylist(tracks: Track[]): Playlist {
   return {
     id: LOCAL_CACHE_PLAYLIST_ID,
     originalId: "",
-    name: "本地缓存",
+    name: t("music.cachePlaylistName"),
     trackCount: tracks.length,
     tracks,
   };
@@ -164,6 +165,7 @@ function savePersistedMode(key: string, mode: PlaybackMode): void {
 }
 
 export function App() {
+  const { locale } = useTranslation();
   const persistedOnline = useMemo(() => loadPersistedMode(LS_MODE_ONLINE, ONLINE_MODES), []);
   const persistedCache = useMemo(() => loadPersistedMode(LS_MODE_CACHE, CACHE_MODES), []);
   const persistedOnlineRef = useRef(persistedOnline);
@@ -207,7 +209,7 @@ export function App() {
   // 缓存虚拟歌单插在头部
   const playlists = useMemo(
     () => [makeCachePlaylist(cacheTracks), ...neteasePlaylists],
-    [cacheTracks, neteasePlaylists],
+    [cacheTracks, neteasePlaylists, locale],
   );
 
   // 自动选源：没登录网易云但有本地曲库时，直接落到本地歌单。
@@ -332,7 +334,7 @@ export function App() {
             next.currentTrack = {
               encryptedId: mpv.track.encryptedId,
               originalId: "",
-              name: mpv.track.name ?? "未知歌曲",
+              name: mpv.track.name ?? t("music.unknownTrack"),
               artists: mpv.track.artists ?? [],
               coverImgUrl: mpv.track.coverUrl,
               visible: true,
@@ -557,11 +559,11 @@ export function App() {
     (track: Track) => {
       endedRef.current = false;
       if (!track.visible) {
-        patch({ error: `「${track.name}」暂时无法播放` });
+        patch({ error: t("music.trackUnavailable", { name: track.name }) });
         return;
       }
       if (!api) {
-        patch({ error: "音乐服务未就绪" });
+        patch({ error: t("music.serviceNotReady") });
         return;
       }
       // 换歌 loading：等 mpv 回 duration（或 3s 超时兜底）
@@ -587,7 +589,7 @@ export function App() {
       }).then((r) => {
         if (!r.ok) throw new Error(r.errorCode ?? "E_PLAYBACK_FAILED");
       }).catch((err) => {
-        patch({ isLoading: false, error: "播放失败：" + (err instanceof Error ? err.message : String(err)) });
+        patch({ isLoading: false, error: t("music.playbackFailed", { message: err instanceof Error ? err.message : String(err) }) });
       });
 
       // 异步补歌词（与 agent 播放路径共享，local- 曲目内部跳过）
@@ -814,14 +816,14 @@ export function App() {
         const r = await api.removeCachedTrack(track.encryptedId);
         if (!r.ok) {
           patch({
-            error: r.errorCode === "E_CACHE_TRACK_PLAYING" ? "正在播放，无法删除" : "删除失败，请稍后再试",
+            error: r.errorCode === "E_CACHE_TRACK_PLAYING" ? t("music.cannotDeletePlaying") : t("music.deleteFailed"),
           });
           return;
         }
         // 本地立即移除（onCacheUpdated 兜底同步）
-        setCacheTracks((ts) => ts.filter((t) => t.encryptedId !== track.encryptedId));
+        setCacheTracks((ts) => ts.filter((item) => item.encryptedId !== track.encryptedId));
       } catch {
-        patch({ error: "删除失败，请稍后再试" });
+        patch({ error: t("music.deleteFailed") });
       }
     },
     [api, patch],
@@ -833,7 +835,7 @@ export function App() {
     try {
       await api.importLocalTracks();
     } catch {
-      patch({ error: "导入失败，请稍后再试" });
+      patch({ error: t("music.importFailed") });
     }
   }, [api, patch]);
 
@@ -858,12 +860,12 @@ export function App() {
     return (
       <div className="mp-shell">
         <div className="mp-window-chrome">
-          <button type="button" className="win-btn" onClick={minimizeWindow} title="最小化"><Minus size={14} /></button>
-          <button type="button" className="win-btn win-btn--close" onClick={closeWindow} title="关闭"><X size={14} /></button>
+          <button type="button" className="win-btn" onClick={minimizeWindow} title={t("music.minimize")}><Minus size={14} /></button>
+          <button type="button" className="win-btn win-btn--close" onClick={closeWindow} title={t("music.close")}><X size={14} /></button>
         </div>
         <div className="mp-not-ready">
-          <p>还没有可播放的音乐</p>
-          <p className="mp-not-ready-hint">在「设置 → 插件 → 音乐工具」里导入本地音乐，或扫码登录网易云</p>
+          <p>{t("music.notReadyTitle")}</p>
+          <p className="mp-not-ready-hint">{t("music.notReadyHint")}</p>
         </div>
       </div>
     );
@@ -872,8 +874,8 @@ export function App() {
   return (
     <div className="mp-shell">
       <div className="mp-window-chrome">
-        <button type="button" className="win-btn" onClick={minimizeWindow} title="最小化"><Minus size={14} /></button>
-        <button type="button" className="win-btn win-btn--close" onClick={closeWindow} title="关闭"><X size={14} /></button>
+        <button type="button" className="win-btn" onClick={minimizeWindow} title={t("music.minimize")}><Minus size={14} /></button>
+        <button type="button" className="win-btn win-btn--close" onClick={closeWindow} title={t("music.close")}><X size={14} /></button>
       </div>
       <MusicPlayer
         state={state}

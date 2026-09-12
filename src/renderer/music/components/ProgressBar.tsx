@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { formatTime } from "../types";
+import { useTranslation } from "../i18n";
 import Slider from "./Slider";
 
 interface ProgressBarProps {
@@ -13,6 +14,7 @@ export default function ProgressBar({
   durationMs,
   onSeek,
 }: ProgressBarProps) {
+  const { t } = useTranslation();
   const [preview, setPreview] = useState<number | null>(null);
   const ratio = durationMs > 0 ? positionMs / durationMs : 0;
   const shownMs = preview !== null ? preview * durationMs : positionMs;
@@ -22,7 +24,7 @@ export default function ProgressBar({
       <span className="progress-time">{formatTime(shownMs)}</span>
       <Slider
         ratio={ratio}
-        ariaLabel="播放进度"
+        ariaLabel={t("music.progressAriaLabel")}
         onPreview={(r) => setPreview(r)}
         onChange={(r) => {
           setPreview(null);

@@ -1,6 +1,7 @@
 import { Trash2, X } from "lucide-react";
 import type { Track } from "../types";
 import { formatTime } from "../types";
+import { useTranslation } from "../i18n";
 
 interface QueueListProps {
   queue: Track[];
@@ -19,8 +20,9 @@ export default function QueueList({
   onRemove,
   onDeleteTrack,
 }: QueueListProps) {
+  const { t } = useTranslation();
   if (queue.length === 0) {
-    return <div className="panel-empty">队列为空</div>;
+    return <div className="panel-empty">{t("music.queueEmpty")}</div>;
   }
   return (
     <ul className="queue">
@@ -51,14 +53,14 @@ export default function QueueList({
               className="queue-main"
               disabled={disabled}
               onClick={() => onPlay(track)}
-              title={disabled ? "该歌曲暂时无法播放" : track.name}
+              title={disabled ? t("music.trackDisabledHint") : track.name}
             >
               <span className="queue-name">{track.name}</span>
               <span className="queue-artist">
                 {track.artists.join(" / ")}
               </span>
             </button>
-            {disabled && <span className="queue-tag">无法播放</span>}
+            {disabled && <span className="queue-tag">{t("music.unavailableTag")}</span>}
             <span className="queue-duration">
               {formatTime(track.durationMs ?? 0)}
             </span>
@@ -66,7 +68,7 @@ export default function QueueList({
               <button
                 type="button"
                 className="icon-btn queue-remove queue-delete"
-                title="删除缓存"
+                title={t("music.deleteCache")}
                 onClick={() => onDeleteTrack(track)}
               >
                 <Trash2 size={14} />
@@ -75,7 +77,7 @@ export default function QueueList({
               <button
                 type="button"
                 className="icon-btn queue-remove"
-                title="从队列移除"
+                title={t("music.removeFromQueue")}
                 onClick={() => onRemove(i)}
               >
                 <X size={14} />

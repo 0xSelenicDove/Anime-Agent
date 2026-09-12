@@ -1,6 +1,7 @@
 import { Loader2, Play, SearchX } from "lucide-react";
 import type { Track } from "../types";
 import { formatTime } from "../types";
+import { useTranslation } from "../i18n";
 
 interface SearchResultsProps {
   results: Track[];
@@ -17,6 +18,7 @@ export default function SearchResults({
   currentId,
   onPlay,
 }: SearchResultsProps) {
+  const { t } = useTranslation();
   if (isSearching) {
     return (
       <div className="panel-empty">
@@ -28,7 +30,7 @@ export default function SearchResults({
     return (
       <div className="panel-empty panel-empty-col">
         <SearchX size={22} />
-        <span>没有找到「{query}」相关的歌曲</span>
+        <span>{t("music.noSearchResults", { query })}</span>
       </div>
     );
   }
@@ -51,7 +53,7 @@ export default function SearchResults({
               className="icon-btn result-play"
               disabled={disabled}
               onClick={() => onPlay(track)}
-              title={disabled ? "该歌曲暂时无法播放" : "播放"}
+              title={disabled ? t("music.trackDisabledHint") : t("music.play")}
             >
               <Play size={14} fill="currentColor" />
             </button>
@@ -62,7 +64,7 @@ export default function SearchResults({
                 {track.album ? ` · ${track.album}` : ""}
               </span>
             </div>
-            {disabled && <span className="queue-tag">无法播放</span>}
+            {disabled && <span className="queue-tag">{t("music.unavailableTag")}</span>}
             <span className="queue-duration">
               {formatTime(track.durationMs ?? 0)}
             </span>

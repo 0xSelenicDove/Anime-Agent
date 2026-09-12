@@ -19,6 +19,7 @@ import {
 import type { MusicPlayerProps } from "../types";
 import logo from "../assets/logo.png";
 import decoBadge from "../assets/music2.png";
+import { useTranslation } from "../i18n";
 import LyricsView from "./LyricsView";
 import ProgressBar from "./ProgressBar";
 import QueueList from "./QueueList";
@@ -27,14 +28,23 @@ import VolumeControl from "./VolumeControl";
 
 type PlayMode = "off" | "all" | "one" | "shuffle";
 
-const MODE_META: Record<
-  PlayMode,
-  { label: string; next: string; Icon: typeof Repeat }
-> = {
-  off: { label: "只放一次", next: "单曲循环", Icon: Repeat },
-  all: { label: "列表循环", next: "单曲循环", Icon: Repeat },
-  one: { label: "单曲循环", next: "随机播放", Icon: Repeat1 },
-  shuffle: { label: "随机播放", next: "只放一次", Icon: Shuffle },
+const MODE_LABEL_KEY: Record<PlayMode, string> = {
+  off: "music.modeOnce",
+  all: "music.modeAll",
+  one: "music.modeOne",
+  shuffle: "music.modeShuffle",
+};
+const MODE_NEXT: Record<PlayMode, PlayMode> = {
+  off: "one",
+  all: "one",
+  one: "shuffle",
+  shuffle: "off",
+};
+const MODE_ICON: Record<PlayMode, typeof Repeat> = {
+  off: Repeat,
+  all: Repeat,
+  one: Repeat1,
+  shuffle: Shuffle,
 };
 
 export default function MusicPlayer({
@@ -51,6 +61,7 @@ export default function MusicPlayer({
   onSearch,
   className,
 }: MusicPlayerProps) {
+  const { t } = useTranslation();
   const [showLyrics, setShowLyrics] = useState(false);
   const [panelCollapsed, setPanelCollapsed] = useState(false);
   const [query, setQuery] = useState("");
@@ -102,7 +113,7 @@ export default function MusicPlayer({
     return () => window.removeEventListener("keydown", onKey);
   }, [actions, state.positionMs, state.volume]);
 
-  const ModeIcon = MODE_META[mode].Icon;
+  const ModeIcon = MODE_ICON[mode];
 
   return (
     <section className={`mp ${className ?? ""}`}>
@@ -111,7 +122,7 @@ export default function MusicPlayer({
           <img className="mp-brand-logo" src={logo} alt="logo" />
           <span className="mp-brand-name">Cyrene Music</span>
         </div>
-        <nav className="mp-playlists" aria-label="歌单选择">
+        <nav className="mp-playlists" aria-label={t("music.playlistNavLabel")}>
           {playlists.map((pl) => (
             <button
               key={pl.id}
@@ -134,7 +145,7 @@ export default function MusicPlayer({
               type="button"
               className="stage-disc-btn"
               onClick={() => setShowLyrics(true)}
-              title="点击查看歌词"
+              title={t("music.viewLyricsHint")}
             >
               <div
                 className={`cover-disc ${state.isPlaying ? "is-spinning" : ""}`}
@@ -160,17 +171,17 @@ export default function MusicPlayer({
             <div
               className="stage-lyrics"
               onClick={() => setShowLyrics(false)}
-              title="点击返回封面"
+              title={t("music.backToCoverHint")}
             >
               <LyricsView track={track} positionMs={state.positionMs} />
             </div>
           </div>
           <div className="stage-meta">
-            <h2 className="stage-title">{track?.name ?? "未在播放"}</h2>
+            <h2 className="stage-title">{track?.name ?? t("music.notPlaying")}</h2>
             <p className="stage-sub">
               {track
                 ? `${track.artists.join(" / ")}${track.album ? ` · ${track.album}` : ""}`
-                : "从播放列表选一首歌开始"}
+                : t("music.pickFromPlaylist")}
             </p>
           </div>
         </div>
@@ -181,7 +192,7 @@ export default function MusicPlayer({
               type="button"
               className="panel-expand"
               onClick={() => setPanelCollapsed(false)}
-              title="展开播放列表"
+              title={t("music.expandQueue")}
             >
               <ListMusic size={18} />
               <span className="panel-expand-count">{state.queue.length}</span>
@@ -189,14 +200,14 @@ export default function MusicPlayer({
           ) : (
             <>
               <div className="panel-header">
-                <span className="panel-title">播放列表</span>
+                <span className="panel-title">{t("music.queueTitle")}</span>
                 <span className="panel-count">{state.queue.length}</span>
                 {modeSet === "cache" && onImportLocalTracks && (
                   <button
                     type="button"
                     className="icon-btn panel-import"
                     onClick={() => onImportLocalTracks()}
-                    title="导入本地音乐"
+                    title={t("music.importLocalMusic")}
                   >
                     <FolderPlus size={16} />
                   </button>
@@ -205,7 +216,7 @@ export default function MusicPlayer({
                   type="button"
                   className="icon-btn panel-collapse"
                   onClick={() => setPanelCollapsed(true)}
-                  title="收起播放列表"
+                  title={t("music.collapseQueue")}
                 >
                   <PanelRightClose size={16} />
                 </button>
@@ -217,7 +228,7 @@ export default function MusicPlayer({
                   type="text"
                   value={query}
                   onChange={(e) => handleQueryChange(e.target.value)}
-                  placeholder="搜索歌曲 / 艺人 / 专辑"
+                  placeholder={t("music.searchPlaceholder")}
                   className="panel-search-input"
                 />
                 {query && (
@@ -225,7 +236,7 @@ export default function MusicPlayer({
                     type="button"
                     className="icon-btn panel-search-clear"
                     onClick={clearQuery}
-                    title="清除搜索"
+                    title={t("music.clearSearch")}
                   >
                     <X size={13} />
                   </button>
@@ -265,7 +276,7 @@ export default function MusicPlayer({
             className="mp-error-retry"
             onClick={() => track && actions.playTrack(track)}
           >
-            重试
+            {t("music.retry")}
           </button>
         </div>
       )}
@@ -286,7 +297,10 @@ export default function MusicPlayer({
               type="button"
               className={`icon-btn ${mode !== "off" ? "is-on" : ""}`}
               onClick={actions.cycleMode}
-              title={`${MODE_META[mode].label}（点击切换${MODE_META[mode].next}）`}
+              title={t("music.modeToggleTitle", {
+                label: t(MODE_LABEL_KEY[mode]),
+                next: t(MODE_LABEL_KEY[MODE_NEXT[mode]]),
+              })}
             >
               <ModeIcon size={17} />
             </button>
@@ -294,7 +308,7 @@ export default function MusicPlayer({
               type="button"
               className="icon-btn"
               onClick={actions.prev}
-              title="上一首"
+              title={t("music.prev")}
             >
               <SkipBack size={19} />
             </button>
@@ -303,7 +317,7 @@ export default function MusicPlayer({
               className="play-btn"
               onClick={actions.togglePlayPause}
               disabled={!track || state.isLoading}
-              title={state.isPlaying ? "暂停" : "播放"}
+              title={state.isPlaying ? t("music.pause") : t("music.play")}
             >
               {state.isLoading ? (
                 <Loader2 size={20} className="spin" />
@@ -317,7 +331,7 @@ export default function MusicPlayer({
               type="button"
               className="icon-btn"
               onClick={actions.next}
-              title="下一首"
+              title={t("music.next")}
             >
               <SkipForward size={19} />
             </button>
