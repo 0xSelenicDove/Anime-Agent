@@ -96,6 +96,11 @@ const chatApi = {
   getImageSendStrategy: (sessionId?: string) =>
     ipcRenderer.invoke(IPC.CHAT_GET_IMAGE_SEND_STRATEGY, sessionId ? { sessionId } : undefined),
   getGeneralSettings: () => ipcRenderer.invoke(IPC.SETTINGS_GET_GENERAL),
+  onUiLocaleChanged: (callback: (locale: string) => void) => {
+    const listener = (_e: unknown, locale: string) => callback(locale);
+    ipcRenderer.on(IPC.UI_LOCALE_CHANGED, listener);
+    return () => ipcRenderer.off(IPC.UI_LOCALE_CHANGED, listener);
+  },
   getReasoningState: (payload?: { sessionId?: string }) => ipcRenderer.invoke(IPC.CHAT_GET_REASONING_STATE, payload),
   setReasoning: (payload: { sessionId?: string; providerKey: string; preference: unknown }) => ipcRenderer.invoke(IPC.CHAT_SET_REASONING, payload),
   // 截图

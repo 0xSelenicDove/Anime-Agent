@@ -136,6 +136,7 @@ export const IPC = {
   SETTINGS_SAVE_TIMEOUT_SETTINGS: "settings:save-timeout-settings",
   UI_THEME_GET: "ui-theme:get",
   UI_THEME_CHANGED: "ui-theme:changed",
+  UI_LOCALE_CHANGED: "ui-locale:changed",
   UI_THEME_RADIUS_GET: "ui-theme-radius:get",
   UI_THEME_RADIUS_CHANGED: "ui-theme-radius:changed",
   UI_WINDOW_CORNER_RADIUS_GET: "ui-window-corner-radius:get",
