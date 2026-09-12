@@ -601,7 +601,19 @@
     "modelNotConnected": "模型未连接",
     "userAlt": "用户",
     "settings": "设置",
-    "newButton": "新建"
+    "newButton": "新建",
+    "titleSuffix": "聊天（React）"
+  },
+  "scheduler": {
+    "unnamedTask": "未命名任务",
+    "taskTriggered": "定时任务「{{title}}」已触发",
+    "defaultToolName": "工具",
+    "toolStatusFailed": "失败",
+    "toolStatusDone": "完成",
+    "toolSummaryLine": "{{name}}：{{status}}",
+    "taskCompleted": "任务执行完毕。",
+    "unknownError": "未知错误",
+    "taskFailed": "定时任务执行失败：{{message}}"
   },
   "moments": {
     "title": "动态",

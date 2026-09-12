@@ -1,4 +1,5 @@
 import { Minus, Plus, Volume1, Volume2, VolumeX } from "lucide-react";
+import { useTranslation } from "../i18n";
 import Slider from "./Slider";
 
 interface VolumeControlProps {
@@ -20,6 +21,7 @@ export default function VolumeControl({
   onSetVolume,
   onToggleMute,
 }: VolumeControlProps) {
+  const { t } = useTranslation();
   const effective = isMuted ? 0 : volume;
   const Icon = isMuted || volume === 0 ? VolumeX : volume < 50 ? Volume1 : Volume2;
 
@@ -29,7 +31,7 @@ export default function VolumeControl({
         type="button"
         className="icon-btn volume-speaker"
         onClick={onToggleMute}
-        title={isMuted ? "取消静音" : "静音"}
+        title={isMuted ? t("music.unmute") : t("music.mute")}
       >
         <Icon size={18} />
       </button>
@@ -38,14 +40,14 @@ export default function VolumeControl({
           type="button"
           className="icon-btn"
           onClick={() => onSetVolume(volume - STEP)}
-          title="音量 -5"
+          title={t("music.volumeDown")}
         >
           <Minus size={14} />
         </button>
         <div className="volume-slider">
           <Slider
             ratio={effective / 100}
-            ariaLabel="音量"
+            ariaLabel={t("music.volumeAriaLabel")}
             onChange={(r) => onSetVolume(r * 100)}
           />
         </div>
@@ -53,7 +55,7 @@ export default function VolumeControl({
           type="button"
           className="icon-btn"
           onClick={() => onSetVolume(volume + STEP)}
-          title="音量 +5"
+          title={t("music.volumeUp")}
         >
           <Plus size={14} />
         </button>

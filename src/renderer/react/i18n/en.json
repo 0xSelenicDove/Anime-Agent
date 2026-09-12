@@ -601,7 +601,19 @@
     "modelNotConnected": "No model connected",
     "userAlt": "You",
     "settings": "Settings",
-    "newButton": "New"
+    "newButton": "New",
+    "titleSuffix": "Chat (React)"
+  },
+  "scheduler": {
+    "unnamedTask": "Untitled task",
+    "taskTriggered": "Scheduled task \"{{title}}\" triggered",
+    "defaultToolName": "Tool",
+    "toolStatusFailed": "Failed",
+    "toolStatusDone": "Done",
+    "toolSummaryLine": "{{name}}: {{status}}",
+    "taskCompleted": "Task completed.",
+    "unknownError": "Unknown error",
+    "taskFailed": "Scheduled task failed: {{message}}"
   },
   "moments": {
     "title": "Moments",

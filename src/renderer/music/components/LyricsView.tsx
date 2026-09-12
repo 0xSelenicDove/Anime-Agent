@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import type { Track } from "../types";
+import { useTranslation } from "../i18n";
 
 interface LyricsViewProps {
   track: Track | null;
@@ -7,6 +8,7 @@ interface LyricsViewProps {
 }
 
 export default function LyricsView({ track, positionMs }: LyricsViewProps) {
+  const { t } = useTranslation();
   const listRef = useRef<HTMLDivElement>(null);
   const lyrics = track?.lyrics ?? [];
 
@@ -27,10 +29,10 @@ export default function LyricsView({ track, positionMs }: LyricsViewProps) {
   }, [activeIndex]);
 
   if (!track) {
-    return <div className="panel-empty">暂无播放</div>;
+    return <div className="panel-empty">{t("music.noPlaybackYet")}</div>;
   }
   if (lyrics.length === 0) {
-    return <div className="panel-empty">暂无歌词</div>;
+    return <div className="panel-empty">{t("music.noLyrics")}</div>;
   }
   return (
     <div className="lyrics" ref={listRef}>

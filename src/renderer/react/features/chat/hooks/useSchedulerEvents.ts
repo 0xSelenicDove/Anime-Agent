@@ -9,6 +9,7 @@
 import { useEffect, useRef } from "react";
 import type { ChatMessageItem } from "../components/ChatMessageList";
 import type { ChatMessage } from "../../../../../shared/chat-types";
+import { t } from "../../../i18n";
 
 /** 主进程 scheduler-runner 转发的事件（AG-UI 事件 + schedulerRunId 标记）。 */
 interface SchedulerStreamEvent {
@@ -111,11 +112,12 @@ export function useSchedulerEvents(deps: UseSchedulerEventsDeps): void {
         const sessionId = depsRef.current.getActiveSessionId() ?? null;
         const replyId = `scheduler-reply-${runKey}`;
         const noticeId = `scheduler-notice-${runKey}`;
-        const title = value?.title ?? "未命名任务";
+        const title = value?.title ?? t("scheduler.unnamedTask");
         streamsRef.current.set(runKey, { sessionId, replyId, content: "", tools: [] });
         if (!sessionId) return;
+        const triggeredNotice = t("scheduler.taskTriggered", { title });
         depsRef.current.appendMessages(sessionId, [
-          { id: noticeId, role: "assistant", content: `定时任务「${title}」已触发` },
+          { id: noticeId, role: "assistant", content: triggeredNotice },
           {
             id: replyId,
             role: "assistant",
@@ -129,7 +131,7 @@ export function useSchedulerEvents(deps: UseSchedulerEventsDeps): void {
         depsRef.current.persistMessage?.(sessionId, {
           id: noticeId,
           role: "model",
-          content: `定时任务「${title}」已触发`,
+          content: triggeredNotice,
           at: Date.now(),
         });
         return;
@@ -144,7 +146,7 @@ export function useSchedulerEvents(deps: UseSchedulerEventsDeps): void {
           if (!event.toolCallId) return;
           state.tools = [
             ...(state.tools ?? []),
-            { id: event.toolCallId, name: event.toolCallName ?? "工具", status: "running" },
+            { id: event.toolCallId, name: event.toolCallName ?? t("scheduler.defaultToolName"), status: "running" },
           ];
           depsRef.current.patchMessage(state.sessionId, state.replyId, {
             toolExecutions: [...state.tools],
@@ -196,15 +198,18 @@ export function useSchedulerEvents(deps: UseSchedulerEventsDeps): void {
         }
         case "RUN_FINISHED": {
           const finalContent = state.content
-            || state.tools?.map((tool) => `${tool.name}：${tool.status === "error" ? "失败" : "完成"}`).join("\n")
-            || "任务执行完毕。";
+            || state.tools?.map((tool) => t("scheduler.toolSummaryLine", {
+              name: tool.name,
+              status: tool.status === "error" ? t("scheduler.toolStatusFailed") : t("scheduler.toolStatusDone"),
+            })).join("\n")
+            || t("scheduler.taskCompleted");
           finishStream(state, finalContent);
           streamsRef.current.delete(runKey);
           return;
         }
         case "RUN_ERROR": {
-          const message = event.message ?? event.error ?? "未知错误";
-          finishStream(state, `定时任务执行失败：${message}`);
+          const message = event.message ?? event.error ?? t("scheduler.unknownError");
+          finishStream(state, t("scheduler.taskFailed", { message }));
           streamsRef.current.delete(runKey);
           return;
         }
