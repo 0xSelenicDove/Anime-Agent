@@ -1,6 +1,6 @@
 {
   "name": "live2d-cyrene",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Live2D desktop pet — Cyrene",
   "main": "dist/main/main/index.js",
   "bin": {
