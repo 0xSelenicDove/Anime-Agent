@@ -6,13 +6,28 @@
 import "../ui/theme";
 import { createTurnSubmitter, type TurnSubmitter } from "./turn-submission";
 import { applyActiveCharacterBranding } from "../shared/apply-active-character";
+import { initWindowI18n } from "../shared/window-i18n";
+import zhCN from "./locales/zh-CN.json";
+import en from "./locales/en.json";
 
-let activeCharacterName = "昔涟";
+const i18n = initWindowI18n({ "zh-CN": zhCN, en });
+const t = i18n.t;
+
+// titleSuffix 是模块加载时算一次的静态字符串，语言切换后不会自动刷新；
+// 改为在 onChange/onLanguageApplied 里手动重算 document.title，两边都能触发。
+let activeCharacterName = "";
+function refreshWindowTitle(): void {
+  if (activeCharacterName) document.title = activeCharacterName + t("call-main.2");
+}
+i18n.onLanguageApplied(refreshWindowTitle);
+
 applyActiveCharacterBranding({
   nameEls: [document.querySelector(".call__name")],
   avatarEls: [document.querySelector<HTMLImageElement>(".call__avatar")],
-  titleSuffix: " · 语音通话",
-  onChange: (branding) => { activeCharacterName = branding.displayName; },
+  onChange: (branding) => {
+    activeCharacterName = branding.displayName;
+    refreshWindowTitle();
+  },
 });
 
 // ── 粒子背景 ──
@@ -148,7 +163,7 @@ function updateUI(): void {
   const mic = micWaveEl;
 
   if (currentState === "LISTENING") {
-    status.textContent = "正在聆听...";
+    status.textContent = t("call-main.3");
     status.className = "call__status";
     ring.classList.remove("is-active");
     wave?.classList.add("is-active");
@@ -156,7 +171,7 @@ function updateUI(): void {
     waveformMode = "listening";
     micMode = "listening";
   } else if (currentState === "THINKING") {
-    status.textContent = `${activeCharacterName}思考中...`;
+    status.textContent = t("call-main.9", { name: activeCharacterName });
     status.className = "call__status call__status--thinking";
     ring.classList.remove("is-active");
     wave?.classList.add("is-active");
@@ -164,7 +179,7 @@ function updateUI(): void {
     waveformMode = "thinking";
     micMode = "thinking";
   } else if (currentState === "SPEAKING") {
-    status.textContent = `${activeCharacterName}说话中...`;
+    status.textContent = t("call-main.10", { name: activeCharacterName });
     status.className = "call__status";
     ring.classList.add("is-active");
     wave?.classList.remove("is-active");
@@ -172,7 +187,7 @@ function updateUI(): void {
     waveformMode = "idle";
     micMode = "idle";
   } else if (currentState === "ERROR") {
-    status.textContent = "连接出错，请检查网络";
+    status.textContent = t("call-main.4");
     status.className = "call__status call__status--error";
     ring.classList.remove("is-active");
     wave?.classList.remove("is-active");
@@ -180,7 +195,7 @@ function updateUI(): void {
     waveformMode = "idle";
     micMode = "idle";
   } else if (currentState === "ENDED") {
-    status.textContent = "通话已结束";
+    status.textContent = t("call-main.5");
     status.className = "call__status";
     ring.classList.remove("is-active");
     wave?.classList.remove("is-active");
@@ -188,7 +203,7 @@ function updateUI(): void {
     waveformMode = "idle";
     micMode = "idle";
   } else {
-    status.textContent = "正在连接...";
+    status.textContent = t("call-main.6");
     status.className = "call__status";
     ring.classList.remove("is-active");
     wave?.classList.remove("is-active");
@@ -204,6 +219,10 @@ function updateUI(): void {
     stopCallTimer();
   }
 }
+
+// 语言到达/切换后重渲染当前状态文案（updateUI 只在状态变化时被动触发，
+// 不会因为语言变化而自动重跑）。
+i18n.onLanguageApplied(() => updateUI());
 
 // ── 转写显示（只显示当前一轮） ──
 function renderTranscript(userText: string, botText: string): void {
@@ -346,7 +365,7 @@ async function startMicrophone(): Promise<void> {
     startVAD();
   } catch (err) {
     console.error("[Call] 麦克风启动失败:", err);
-    statusEl.textContent = "无法访问麦克风，请检查权限";
+    statusEl.textContent = t("call-main.7");
     statusEl.className = "call__status call__status--error";
   }
 }
@@ -531,7 +550,7 @@ window.call?.onAsrResult((data: { partial?: string; final?: string }) => {
 });
 
 window.call?.onTtsAudio((data: { base64: string }) => {
-  renderTranscript(currentUserText, "（语音回复中）");
+  renderTranscript(currentUserText, t("call-main.8"));
   playTtsAudio(data.base64);
 });
 
